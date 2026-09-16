@@ -1,5 +1,22 @@
-sequenceDiagram
-	Alice->>+John: Hello John, how are you?
-	Alice->>+John: John, can you hear me?
-	John-->>-Alice: Hi Alice, I can hear you!
-	John-->>-Alice: I feel great!
+flowchart TB
+    customer["👤 Пользователь<br/>Размещает заказ"]
+    employee["👤 Сотрудник магазина<br/>Готовит заказ"]
+    courier["👤 Курьер<br/>Доставляет заказ"]
+
+    system["🏢 Система QuickSandwich<br/>Обработка заказов, оплата, уведомления"]
+
+    payment["☁️ Платёжная система<br/>(внешняя)"]
+    phone["☁️ Система заказов по телефону<br/>(legacy)"]
+
+    customer -->|"размещает заказ, оплачивает"| system
+    system -->|"передаёт заказ"| employee
+    system -->|"назначает доставку"| courier
+    system -->|"обрабатывает платёж"| payment
+    phone -.->|"интеграция заказов"| system
+
+    style system fill:#1168bd,color:#fff
+    style customer fill:#08427b,color:#fff
+    style employee fill:#08427b,color:#fff
+    style courier fill:#08427b,color:#fff
+    style payment fill:#999999,color:#fff
+    style phone fill:#999999,color:#fff

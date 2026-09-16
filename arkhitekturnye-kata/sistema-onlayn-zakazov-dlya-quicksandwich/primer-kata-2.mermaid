@@ -1,0 +1,55 @@
+flowchart TB
+    customer["👤 Пользователь"]
+    employee["👤 Сотрудник магазина"]
+    courier["👤 Курьер"]
+
+    subgraph QS["Система QuickSandwich"]
+        mobileApp["📱 Mobile App<br/>React Native"]
+        employeeApp["💻 Employee App<br/>Веб-приложение"]
+        gateway["🚪 API Gateway"]
+
+        orderService["📦 Сервис заказов<br/>Spring Boot"]
+        orderDb[("Order DB<br/>PostgreSQL")]
+
+        paymentService["💳 Сервис оплаты<br/>Node.js"]
+        paymentDb[("Payment DB<br/>PostgreSQL")]
+
+        promoService["🎁 Сервис акций<br/>Python"]
+        promoDb[("Promo DB<br/>MongoDB")]
+
+        deliveryService["🚴 Сервис доставки<br/>Go"]
+        deliveryDb[("Delivery DB<br/>PostgreSQL")]
+    end
+
+    paymentProvider["☁️ Платёжный провайдер<br/>(внешний)"]
+    geoService["☁️ Сервис геолокации<br/>(внешний)"]
+
+    customer --> mobileApp
+    employee --> employeeApp
+
+    mobileApp --> gateway
+    employeeApp --> gateway
+
+    gateway --> orderService
+    gateway --> paymentService
+    gateway --> promoService
+    gateway --> deliveryService
+
+    orderService --> orderDb
+    paymentService --> paymentDb
+    promoService --> promoDb
+    deliveryService --> deliveryDb
+
+    orderService -.->|"инициирует оплату"| paymentService
+    orderService -.->|"создаёт заявку"| deliveryService
+
+    paymentService --> paymentProvider
+    deliveryService --> geoService
+    deliveryService -.->|"push/SMS"| courier
+
+    style QS fill:#f5f5f5,stroke:#333,stroke-width:2px
+    style gateway fill:#1168bd,color:#fff
+    style orderService fill:#438dd5,color:#fff
+    style paymentService fill:#438dd5,color:#fff
+    style promoService fill:#438dd5,color:#fff
+    style deliveryService fill:#438dd5,color:#fff
