@@ -1,5 +1,5 @@
 ---
-title: 🥪Система онлайн-заказов для "QuickSandwich"
+title: 🥪QuickSandwich - система онлайн-заказов сэндвичей
 order: 0.5
 aliases:
   - path: >-
