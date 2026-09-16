@@ -111,6 +111,8 @@ order: 1
 
 :::
 
+[mermaid:./arkhitekturnoe-kata-roombooker-bronirovani.mermaid::497px:363px]
+
 ### Level 2 -- Containers
 
 :::tip 
@@ -124,6 +126,8 @@ order: 1
 Необязательно, но кто сделал - молодец
 
 :::
+
+[mermaid:./arkhitekturnoe-kata-roombooker-bronirovani-2.mermaid::497px:363px]
 
 ## 🚩 4. Главный риск выбранного решения
 

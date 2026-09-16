@@ -116,6 +116,8 @@ aliases:
 
 :::
 
+[mermaid:./shablon.mermaid::497px:363px]
+
 ### Level 2 -- Containers
 
 :::tip 
@@ -129,6 +131,8 @@ aliases:
 Необязательно, но кто сделал - молодец
 
 :::
+
+[mermaid:./shablon-2.mermaid::497px:363px]
 
 ## 🚩 4. Главный риск выбранного решения
 

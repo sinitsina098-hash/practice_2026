@@ -111,6 +111,8 @@ order: 1
 
 :::
 
+[mermaid:./uchastniki-gruppy.mermaid::497px:363px]
+
 ### Level 2 -- Containers
 
 :::tip 
@@ -124,6 +126,8 @@ order: 1
 Необязательно, но кто сделал - молодец
 
 :::
+
+[mermaid:./uchastniki-gruppy-2.mermaid::497px:363px]
 
 ## 🚩 4. Главный риск выбранного решения
 
