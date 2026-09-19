@@ -131,7 +131,7 @@ order: 1
 
 :::
 
-[mermaid:./arkhitekturnoe-kata-roombooker-bronirovani-2.mermaid::497px:363px]
+![](./arkhitekturnoe-kata-roombooker-bronirovani-2.webp){width=1682px height=1448px}
 
 ## 🚩 4. Главный риск выбранного решения
 
