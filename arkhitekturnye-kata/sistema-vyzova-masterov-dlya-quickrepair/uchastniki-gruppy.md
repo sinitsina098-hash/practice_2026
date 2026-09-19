@@ -115,7 +115,7 @@ order: 1
 
 :::
 
-
+[drawio:./uchastniki-gruppy.svg::211px:101px]
 
 ### Level 2 -- Containers
 
