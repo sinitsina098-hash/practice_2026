@@ -113,7 +113,7 @@ order: 1
 
 :::
 
-[mermaid:./uchastniki-gruppy.mermaid::497px:363px]
+![](./arkhitekturnoe-kata-quickfix-servis-vyzova.webp){width=765px height=542px}
 
 ### Level 2 -- Containers
 
