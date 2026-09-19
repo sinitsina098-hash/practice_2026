@@ -109,29 +109,13 @@ order: 1
 
 ### **Level 1 -- Context**
 
-:::tip 
+![](./arkhitekturnoe-kata-edupath-platforma-onla.webp){width=2760px height=1480px}
 
-Кто взаимодействует с системой: пользователи, внешние системы
 
-:::
-
-[mermaid:./arkhitekturnoe-kata-edupath-platforma-onla.mermaid::497px:363px]
 
 ### Level 2 -- Containers
 
-:::tip 
-
-Из каких крупных частей состоит система.
-
-:::
-
-:::note 
-
-Необязательно, но кто сделал - молодец
-
-:::
-
-[mermaid:./arkhitekturnoe-kata-edupath-platforma-onla-2.mermaid::497px:363px]
+![](./arkhitekturnoe-kata-edupath-platforma-onla-2.webp){width=2760px height=1816px}
 
 ## 🚩 4. Главный риск выбранного решения
 
