@@ -111,9 +111,15 @@ order: 1
 
 :::tip:true Подробнее
 
-Кто взаимодействует с системой: пользователи, внешние системы
 
-![](./arkhitekturnoe-kata-roombooker-bronirovani.webp){width=1558px height=494px}
+
+:::
+
+![](./arkhitekturnoe-kata-roombooker-bronirovani-3.webp){width=2600px height=825px}
+
+:::tip:true 
+
+Кто взаимодействует с системой: пользователи, внешние системы
 
 :::
 
@@ -131,7 +137,7 @@ order: 1
 
 :::
 
-![](./arkhitekturnoe-kata-roombooker-bronirovani-2.webp){width=1682px height=1448px}
+![](./arkhitekturnoe-kata-roombooker-bronirovani.webp){width=2600px height=1125px}
 
 ## 🚩 4. Главный риск выбранного решения
 
