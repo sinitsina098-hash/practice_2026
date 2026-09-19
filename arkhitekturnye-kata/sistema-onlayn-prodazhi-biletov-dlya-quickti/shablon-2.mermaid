@@ -1,5 +1,27 @@
-sequenceDiagram
-	Alice->>+John: Hello John, how are you?
-	Alice->>+John: John, can you hear me?
-	John-->>-Alice: Hi Alice, I can hear you!
-	John-->>-Alice: I feel great!
+flowchart TB
+    employee["👤 Сотрудник<br/>Бронирует переговорные"]
+    admin["👤 Администратор офиса<br/>Управляет списком комнат"]
+
+    subgraph roombooker["🏢 Система RoomBooker"]
+        spa["🖥️ Веб-приложение SPA<br/>React, работает в браузере"]
+        app["⚙️ Монолитное приложение<br/>Spring Boot: REST API + SSE<br/>Модули: комнаты, брони, админ, уведомления"]
+        db[("🗄️ База данных<br/>PostgreSQL: комнаты, брони, пользователи")]
+    end
+
+    ldap["☁️ Корпоративный AD / LDAP<br/>(внешняя)"]
+    smtp["☁️ Почтовый сервер SMTP<br/>(внешняя)"]
+
+    employee -->|"HTTPS"| spa
+    admin -->|"HTTPS"| spa
+    spa -->|"REST/JSON, SSE для живого расписания"| app
+    app -->|"SQL, транзакции + exclusion constraint"| db
+    app -->|"LDAP / OIDC"| ldap
+    app -->|"SMTP"| smtp
+
+    style spa fill:#1168bd,color:#fff
+    style app fill:#1168bd,color:#fff
+    style db fill:#1168bd,color:#fff
+    style employee fill:#08427b,color:#fff
+    style admin fill:#08427b,color:#fff
+    style ldap fill:#999999,color:#fff
+    style smtp fill:#999999,color:#fff

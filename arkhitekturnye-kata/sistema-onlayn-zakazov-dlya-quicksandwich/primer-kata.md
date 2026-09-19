@@ -113,7 +113,7 @@ order: 3
 
 ### Level 2 -- Containers
 
-[mermaid:./primer-kata-2.mermaid::780px:380px::814px]
+[mermaid:./primer-kata-2.mermaid::780px:381px::814px]
 
 
 

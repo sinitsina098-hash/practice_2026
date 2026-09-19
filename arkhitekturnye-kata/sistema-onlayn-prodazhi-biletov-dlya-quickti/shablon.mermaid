@@ -1,5 +1,22 @@
-sequenceDiagram
-	Alice->>+John: Hello John, how are you?
-	Alice->>+John: John, can you hear me?
-	John-->>-Alice: Hi Alice, I can hear you!
-	John-->>-Alice: I feel great!
+flowchart TB
+    employee["👤 Сотрудник<br/>Бронирует переговорные"]
+    admin["👤 Администратор офиса<br/>Управляет списком комнат"]
+
+    system["🏢 Система RoomBooker<br/>Поиск свободных комнат, бронирование, отмена"]
+
+    ldap["☁️ Корпоративный AD / LDAP<br/>(внешняя)"]
+    smtp["☁️ Почтовый сервер SMTP<br/>(внешняя)"]
+    excel["☁️ Excel-таблица броней<br/>(legacy)"]
+
+    employee -->|"ищет комнату, бронирует, отменяет"| system
+    admin -->|"добавляет и убирает комнаты"| system
+    system -->|"аутентифицирует пользователя"| ldap
+    system -->|"шлёт уведомления о бронях"| smtp
+    excel -.->|"разовая миграция данных"| system
+
+    style system fill:#1168bd,color:#fff
+    style employee fill:#08427b,color:#fff
+    style admin fill:#08427b,color:#fff
+    style ldap fill:#999999,color:#fff
+    style smtp fill:#999999,color:#fff
+    style excel fill:#999999,color:#fff
