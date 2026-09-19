@@ -113,9 +113,9 @@ order: 1
 
 Кто взаимодействует с системой: пользователи, внешние системы
 
-:::
+![](./arkhitekturnoe-kata-roombooker-bronirovani.webp){width=1558px height=494px}
 
-[mermaid:./arkhitekturnoe-kata-roombooker-bronirovani.mermaid::497px:363px]
+:::
 
 ### Level 2 -- Containers
 
