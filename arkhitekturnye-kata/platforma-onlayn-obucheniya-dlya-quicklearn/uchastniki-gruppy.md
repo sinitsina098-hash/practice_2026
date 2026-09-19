@@ -107,17 +107,13 @@ order: 1
 
 ## 📐 3. С4-диаграмма
 
-### **Level 1 -- Context**
-
 :::tip 
 
 Кто взаимодействует с системой: пользователи, внешние системы
 
 :::
 
-[mermaid:./uchastniki-gruppy.mermaid::497px:363px]
-
-### Level 2 -- Containers
+![](./uchastniki-gruppy.webp){width=1536px height=1024px}
 
 :::tip 
 
@@ -131,7 +127,7 @@ order: 1
 
 :::
 
-[mermaid:./uchastniki-gruppy-2.mermaid::497px:363px]
+![](./uchastniki-gruppy-2.webp){width=1536px height=1024px}
 
 ## 🚩 4. Главный риск выбранного решения
 
