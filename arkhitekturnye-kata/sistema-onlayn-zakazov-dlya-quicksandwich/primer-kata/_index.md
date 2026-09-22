@@ -109,11 +109,11 @@ order: 3
 
 ### **Level 1 -- Context**
 
-[mermaid:./primer-kata.mermaid::770px:494px::780px]
+[mermaid:./_index.mermaid::770px:494px::780px]
 
 ### Level 2 -- Containers
 
-[mermaid:./primer-kata-2.mermaid::780px:381px::814px]
+[mermaid:./_index-2.mermaid::780px:381px::814px]
 
 
 
