@@ -107,28 +107,6 @@ Availability Service (Сервис доступности и расписани�
 
    список: masterId, distanceKm, status
 
----
-
-*  {% colwidth=[156] %}
-
-   
-
-*  {% colwidth=[156] %}
-
-   
-
-*  {% colwidth=[156] %}
-
-   
-
-*  {% colwidth=[192] %}
-
-   
-
-*  {% colwidth=[239] %}
-
-   
-
 {% /table %}
 
 ## 3\. 🤝 Swagger
