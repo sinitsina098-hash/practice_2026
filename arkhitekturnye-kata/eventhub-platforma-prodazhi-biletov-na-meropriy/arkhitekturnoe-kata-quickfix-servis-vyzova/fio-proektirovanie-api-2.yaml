@@ -2,7 +2,7 @@ openapi: "3.0.1"
 info:
   version:  1.0.0 | 26.09.2026
   title: MS TicketCheck
-  description: API микросервиса проверки электронных билетов EventHub. Сервис принимает QR/идентификатор билета на входе, проверяет валидность, погашает билет и отдаёт контролёру результат проверки.
+  description: API проверки электронного билета на входе
 security:
   - BearerAuth: []
   - OAuth2: []
@@ -11,7 +11,7 @@ servers:
   - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
     variables:
         Host:
-          default: host.ru
+          default: proverochka.ru
           description: Host на котором развернут микросервис
         EnvironmentPrefix:
           default: ''
@@ -25,21 +25,21 @@ servers:
             Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
 tags:
     - name: ticket-check operations
-      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с проверкой и погашением билетов стоит тэгировать как ticket-check operations
+      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с проверкой билетов стоит тэгировать как ticket-check operations
 paths:
   /tickets:
     get:
-      tags:
+      tags: 
         - ticket-check operations
-      operationId: GetTickets
+      operationId: GetTicket
       summary: Получить список билетов
-      description: Метод возвращает список билетов, доступных к проверке на мероприятии. При запросе список фильтруется по идентификатору мероприятия и статусу билета
+      description: Метод возвращает список билетов. При запросе можно отфильтровать список
       parameters:
         - in: query
           name: ticketFilter
           required: true
           schema:
-            $ref: "#/components/schemas/ticketFilter"
+            $ref: "#/components/parameters/ticketFilter"
       responses:
         200:
           description: OK
@@ -55,25 +55,26 @@ paths:
           description: Not Found
         500:
           description: Internal Service Error
+
+
     post:
-      tags:
+      tags: 
         - ticket-check operations
-      operationId: VerifyTicket
+      operationId: CreateTicketCheck
       summary: Проверить билет
-      description: Метод принимает QR-код или идентификатор билета и выполняет проверку на входе. При успешной проверке билет погашается, факт прохода сохраняется
+      description: Метод создает результат проверки билета с его уникальным идентификатором
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TicketRq'
+              $ref: '#/components/schemas/TicketsRp'
       responses:
         201:
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ticket'
+                  $ref: '#/components/parameters/ticketId'
         204:
           description: No Content
         400:
@@ -84,13 +85,13 @@ paths:
           description: Not Found
         500:
           description: Internal Service Error
-  /tickets/{ticketId}:
+  /tickets/{ticketId}:  
     delete:
-      tags:
+      tags: 
         - ticket-check operations
-      operationId: deleteTicketCheckIn
-      summary: Отменить погашение билета по его идентификатору
-      description: Метод отменяет факт прохода и возвращает билет в статус оплачен. Используется контролёром при ошибочном скане
+      operationId: deleteTicket
+      summary: Удалить билет по его идентификатору
+      description: Метод удаляет объект по его идентификатору
       parameters:
         - in: path
           name: ticketId
@@ -109,11 +110,11 @@ paths:
         500:
           description: Internal Service Error
     put:
-      tags:
+      tags: 
         - ticket-check operations
       operationId: UpdateTicket
-      summary: Обновить статус билета
-      description: Метод обновляет объект билета по его идентификатору по атрибутам переданным в запросе. Используется для ручного погашения или смены точки входа
+      summary: Обновить билет
+      description: Метод обновляет объект по его идентификатору по атрибутам переданным в запросе
       parameters:
         - in: path
           name: ticketId
@@ -129,10 +130,6 @@ paths:
       responses:
         200:
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Ticket'
         204:
           description: No Content
         400:
@@ -155,11 +152,11 @@ components:
           password:
             tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
             scopes: {}
-  parameters:
+  parameters:  
     ticketId:
       name: ticketId
       in: path
-      description: Уникальный идентификатор билета
+      description: Уникальный идентификатор
       required: true
       schema:
         type: string
@@ -167,15 +164,15 @@ components:
     ticketFilter:
       name: ticketFilter
       in: query
-      description: Фильтр параметр списка билетов
+      description: Фильтр параметр
       required: true
       schema:
         $ref: '#/components/schemas/ticketFilter'
   schemas:
     ticketFilter:
-      description: Фильтр параметр билета. Передаётся идентификатор мероприятия, для которого контролёр запрашивает список билетов
+      description: Фильтр параметр билета
       type: string
-    TicketsRp:
+    TicketsRp: 
         description: Список объектов билет
         type: array
         items:
@@ -183,78 +180,17 @@ components:
     Ticket:
       type: object
       description: Объект билет
-      required:
+      required: 
         - ticketId
       properties:
-        ticketId:
-         type: string
-         format: uuid
-         description: Уникальный идентификатор билета
-        eventId:
-         type: string
-         format: uuid
-         description: Идентификатор мероприятия, к которому относится билет
-        holderName:
-         type: string
-         description: ФИО владельца билета
-        tariff:
-         type: string
-         description: Тариф билета, например Standard или VIP
-        seat:
-         type: string
-         description: Место в зале
-        status:
-         type: string
-         description: Текущий статус билета. Допустимые значения PAID, REDEEMED, REFUNDED, REVOKED
         result:
          type: string
-         description: Результат последней проверки. Допустимые значения VALID, ALREADY_USED, NOT_FOUND, WRONG_EVENT, NOT_PAID, EXPIRED, NOT_STARTED, REVOKED
-        gateId:
-         type: string
-         description: Идентификатор точки входа, на которой выполнен проход
-        checkedAt:
-         type: string
-         format: date-time
-         description: Дата и время последней проверки билета
-        redeem:
-         type: boolean
-         description: Признак, что билет должен быть погашен при успешной проверке
-    TicketRq:
-      type: object
-      description: Тело запроса на проверку или обновление билета
-      required:
-        - eventId
-        - redeem
-      properties:
-        ticketCode:
-         type: string
-         description: Строка из QR-кода билета. Передаётся, если контролёр сканирует QR
-        ticketId:
-         type: string
-         format: uuid
-         description: Идентификатор билета. Передаётся, если QR недоступен
-        eventId:
-         type: string
-         format: uuid
-         description: Идентификатор мероприятия, на вход которого выполняется проверка
-        sessionId:
-         type: string
-         description: Идентификатор сеанса мероприятия
-        gateId:
-         type: string
-         description: Идентификатор точки входа контролёра
-        redeem:
-         type: boolean
-         description: Признак погашения. true — проверить и погасить, false — только проверить
+         description: Результат проверки
         status:
          type: string
-         description: Новый статус билета при обновлении через PUT
-        holderName:
-         type: string
-         description: ФИО владельца билета
-        tariff:
-         type: string
-         description: Тариф билета
-        seat:
-         type: string
-         description: Место в зале
+         description: Статус билета
+        eventMatch:
+         type: boolean
+         description: Признак принадлежности билета мероприятию
+    TicketRq:
+      $ref: '#/components/schemas/Ticket'
