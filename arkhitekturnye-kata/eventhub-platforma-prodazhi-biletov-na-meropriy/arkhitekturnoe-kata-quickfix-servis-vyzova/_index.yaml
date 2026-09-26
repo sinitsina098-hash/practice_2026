@@ -28,34 +28,29 @@ paths:
       tags:
       - "events"
       operationId: "updateEventCapacity"
-
+  
       consumes:
       - "application/json"
-
+  
       produces:
       - "application/json"
-
+  
       parameters:
-      - name: "eventId"
-        in: "query"
-        required: true
-        type: "string"
-
       - in: "body"
         name: "body"
         required: true
         schema:
           $ref: "#/definitions/CapacityRequest"
-
+  
       responses:
         "200":
           description: "Количество билетов успешно сохранено"
-
+  
         "400":
           description: "Некорректные данные мероприятия"
           schema:
             $ref: "#/definitions/ErrorResponse"
-
+  
         "500":
           description: "Внутренняя ошибка сервиса"
           schema:
@@ -191,9 +186,13 @@ definitions:
   CapacityRequest:
     type: "object"
     required:
+    - "eventId"
     - "totalTickets"
-
+  
     properties:
+      eventId:
+        type: "string"
+  
       totalTickets:
         type: "integer"
 
