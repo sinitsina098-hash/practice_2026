@@ -1,5 +1,9 @@
-sequenceDiagram
-	Alice->>+John: Hello John, how are you?
-	Alice->>+John: John, can you hear me?
-	John-->>-Alice: Hi Alice, I can hear you!
-	John-->>-Alice: I feel great!
+flowchart TD
+    Web["Web-сайт"] -->|"HTTP/REST"| Gateway["API Gateway"]
+    Mobile["Mobile App"] -->|"HTTP/REST"| Gateway
+    Gateway --> TicketService["Ticket Service"]
+    
+    TicketService --> Catalog["Catalog Service"]
+    TicketService --> Payment["Payment Service"]
+    TicketService --> Notification["Notification Service"]
+    TicketService <-->|"SQL"| TicketDB[("PostgreSQL")]
