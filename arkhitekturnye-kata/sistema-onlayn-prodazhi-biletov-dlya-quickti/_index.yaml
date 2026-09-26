@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: RoomBooker API
+  description: API для системы онлайн-бронирования комнат
+  version: 1.0.0
+servers:
+  - url: https://app.roombooker.ax/api/v1
+    description: Основной сервер RoomBooker
+tags:
+  - name: bookings operations
+    description: Операции с бронированиями
+    roomId:
+          type: integer
+paths:
+  /bookings:
+    post:
+      tags:
+        - bookings operations
+      summary: Забронировать комнату
+      description: Создать объект бронирования.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRq'
+      responses:
+        '201':
+          description: Бронь создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+components:
+  schemas:
+    Booking:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        userId:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+    BookingRq:
+      type: object
+      required:
+        - roomId
+        - startTime
+        - endTime
+      properties:
+        roomId:
+          type: integer
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
