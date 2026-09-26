@@ -1,0 +1,319 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a sample server Petstore server.",
+    "version": "1.0.0",
+    "title": "Swagger Petstore"
+  },
+  "host": "petstore.swagger.io",
+  "basePath": "/v2",
+  "tags": [
+    {
+      "name": "user",
+      "description": "операции с пользователем"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/user": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Создать пользователя",
+        "description": "Создаёт профиль после регистрации в IdP. Вызывается до получения токена.",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Данные о пользователе",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User_in"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Пользователь создан",
+            "schema": {
+              "$ref": "#/definitions/User_out"
+            }
+          },
+          "400": {
+            "description": "Неверные данные"
+          },
+          "409": {
+            "description": "Данный email или userName уже используется"
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Получить пользователя по id",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный ответ",
+            "schema": {
+              "$ref": "#/definitions/User_out"
+            }
+          },
+          "401": {
+            "description": "Токен отсутствует или недействителен"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Обновить пользователя",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User_patch"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь обновлён",
+            "schema": {
+              "$ref": "#/definitions/User_out"
+            }
+          },
+          "400": {
+            "description": "Неверные данные"
+          },
+          "401": {
+            "description": "Токен отсутствует или недействителен"
+          },
+          "404": {
+            "description": "Пользователь не найден"
+          },
+          "409": {
+            "description": "Данный email или userName уже используется"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Удалить клиента",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный ответ",
+            "schema": {
+              "$ref": "#/definitions/User_out"
+            }
+          },
+          "401": {
+            "description": "Токен отсутствует или недействителен"
+          },
+          "404": {
+            "description": "Пользователя с таким id не существует"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User_in": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "userName",
+        "firstName",
+        "lastName",
+        "email"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        },
+        "userName": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 100,
+          "example": "petrivanov"
+        },
+        "firstName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 25,
+          "example": "Петр"
+        },
+        "lastName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "example": "Иванов"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "useremail@example.com"
+        }
+      }
+    },
+    "User_out": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+        },
+        "userName": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 100,
+          "example": "petrivanov"
+        },
+        "firstName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 25,
+          "example": "Петр"
+        },
+        "lastName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "example": "Иванов"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "useremail@example.com"
+        },
+        "pets": {
+          "type": "array",
+          "description": "id питомцев пользователя",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "example": [
+            123,
+            234,
+            345
+          ]
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "user"
+          ],
+          "default": "user"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2026-10-09T10:30:00Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2026-10-09T10:30:00Z"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time",
+          "x-nullable": true,
+          "example": null
+        }
+      }
+    },
+    "User_patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "userName": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 100,
+          "example": "petrivanov"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "example": "useremail@example.com"
+        }
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@ aliases:
 
 ### 1\.2 Описание микросервиса clients-srv
 
-*Назначение:* управление учётными записями клиентов (владельцев питомцев) -- регистрация, изменение и удаление данных, синхронизация с микросервисом питомцев.
+*Назначение:* управление учётными записями клиентов (владельцев питомцев) -- регистрация, изменение и удаление данных, синхронизация с микросервисом питомцев.
 
 Пароль будет хранить внешний провайдер (например, keycloak). FE получает токен от ldP, и с ним ходит в clients-srv, поэтому эндпоинт с входом/выходом я убрала. Функциональность:
 
@@ -39,8 +39,6 @@ aliases:
 ---
 
 *  {% colwidth=[134] %}
-
-   
 
    Потребители
 
@@ -125,7 +123,7 @@ aliases:
 
 *  {% colwidth=[192] %}
 
-   Authorization (Bearer JWTToken) и id
+   Authorization (JWTToken) и id
 
    ```
    {
@@ -173,7 +171,7 @@ aliases:
 
 *  {% colwidth=[192] %}
 
-   Authorization (Bearer JWTToken) и id
+   Authorization (JWTToken) и id
 
 *  {% colwidth=[329] %}
 
@@ -214,7 +212,7 @@ aliases:
 
 *  {% colwidth=[192] %}
 
-   Authorization (Bearer JWTToken) и id
+   Authorization (JWTToken) и id
 
 *  {% colwidth=[329] %}
 
@@ -279,7 +277,7 @@ aliases:
 
 *  {% colwidth=[256] %}
 
-    Получение данных пользователя, включая role
+   Получение данных пользователя, включая role
 
 *  {% colwidth=[235] %}
 
@@ -315,8 +313,18 @@ aliases:
 
 {% /table %}
 
-## 3\. 🤝 Swagger
+![](./kosheleva-anna-konstantinovna-3.webp){width=1123px height=1068px}
+
+## 3\. 🤝 Swagger 
+
+[swagger.json](./swagger.json) , так как ниже почему-то нет тела ответов в ответах.
 
 [openapi:./_index-2-2.yaml:true]
 
-### 
+То есть имеем:
+
+![](./kosheleva-anna-konstantinovna-4.webp){width=413px height=751px}
+
+БД clients: 
+
+![](./kosheleva-anna-konstantinovna-5.webp){width=331px height=465px}
