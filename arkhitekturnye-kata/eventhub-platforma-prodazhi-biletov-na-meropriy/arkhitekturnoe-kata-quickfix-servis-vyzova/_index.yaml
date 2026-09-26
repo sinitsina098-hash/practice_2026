@@ -1,58 +1,58 @@
 swagger: "2.0"
 
 info:
-  description: "Analytics Service"
+  description: Analytics Service
   version: "1.0.0"
-  title: "EventHub Analytics Service"
+  title: EventHub Analytics Service
 
-host: "api.eventhub.example.com"
-basePath: "/v1"
+host: api.eventhub.example.com
+basePath: /v1
 
 tags:
-- name: "events"
-  description: "Данные мероприятий для расчета статистики"
+- name: events
+  description: Данные мероприятий для расчета статистики
 
-- name: "sales"
-  description: "Регистрация продаж и отмен"
+- name: sales
+  description: Регистрация продаж и отмен
 
-- name: "statistics"
-  description: "Получение статистики продаж"
+- name: statistics
+  description: Получение статистики продаж
 
 schemes:
-- "https"
+- https
 
 paths:
 
   /events/capacity:
     put:
       tags:
-      - "events"
-      operationId: "updateEventCapacity"
-  
+      - events
+      operationId: updateEventCapacity
+
       consumes:
-      - "application/json"
-  
+      - application/json
+
       produces:
-      - "application/json"
-  
+      - application/json
+
       parameters:
-      - in: "body"
-        name: "body"
+      - in: body
+        name: body
         required: true
         schema:
           $ref: "#/definitions/CapacityRequest"
-  
+
       responses:
         "200":
-          description: "Количество билетов успешно сохранено"
-  
+          description: Количество билетов успешно сохранено
+
         "400":
-          description: "Некорректные данные мероприятия"
+          description: Некорректные данные мероприятия
           schema:
             $ref: "#/definitions/ErrorResponse"
-  
+
         "500":
-          description: "Внутренняя ошибка сервиса"
+          description: Внутренняя ошибка сервиса
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -60,35 +60,35 @@ paths:
   /sales:
     post:
       tags:
-      - "sales"
-      operationId: "registerSale"
+      - sales
+      operationId: registerSale
 
       consumes:
-      - "application/json"
+      - application/json
 
       produces:
-      - "application/json"
+      - application/json
 
       parameters:
-      - in: "body"
-        name: "body"
+      - in: body
+        name: body
         required: true
         schema:
           $ref: "#/definitions/CreateSaleRequest"
 
       responses:
         "200":
-          description: "Продажа успешно зарегистрирована"
+          description: Продажа успешно зарегистрирована
           schema:
             $ref: "#/definitions/Sale"
 
         "400":
-          description: "Некорректные данные продажи"
+          description: Некорректные данные продажи
           schema:
             $ref: "#/definitions/ErrorResponse"
 
         "500":
-          description: "Внутренняя ошибка сервиса"
+          description: Внутренняя ошибка сервиса
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -96,87 +96,87 @@ paths:
   /sales/cancellations:
     post:
       tags:
-      - "sales"
-      operationId: "registerSaleCancellation"
+      - sales
+      operationId: registerSaleCancellation
 
       consumes:
-      - "application/json"
+      - application/json
 
       produces:
-      - "application/json"
+      - application/json
 
       parameters:
-      - in: "body"
-        name: "body"
+      - in: body
+        name: body
         required: true
         schema:
           $ref: "#/definitions/CancellationRequest"
 
       responses:
         "200":
-          description: "Отмена успешно зарегистрирована"
+          description: Отмена успешно зарегистрирована
           schema:
             $ref: "#/definitions/Cancellation"
 
         "400":
-          description: "Некорректные данные отмены"
+          description: Некорректные данные отмены
           schema:
             $ref: "#/definitions/ErrorResponse"
 
         "404":
-          description: "Продажа с указанным saleId не найдена"
+          description: Продажа с указанным saleId не найдена
           schema:
             $ref: "#/definitions/ErrorResponse"
 
         "500":
-          description: "Внутренняя ошибка сервиса"
+          description: Внутренняя ошибка сервиса
           schema:
             $ref: "#/definitions/ErrorResponse"
 
 
-  /events/statistics:
+  /events/{eventId}/statistics:
     get:
       tags:
-      - "statistics"
-      operationId: "getEventStatistics"
+      - statistics
+      operationId: getEventStatistics
 
       produces:
-      - "application/json"
+      - application/json
 
       parameters:
-      - name: "eventId"
-        in: "query"
+      - name: eventId
+        in: path
         required: true
-        type: "string"
+        type: string
 
-      - name: "from"
-        in: "query"
+      - name: from
+        in: query
         required: false
-        type: "string"
+        type: string
 
-      - name: "to"
-        in: "query"
+      - name: to
+        in: query
         required: false
-        type: "string"
+        type: string
 
       responses:
         "200":
-          description: "Статистика мероприятия успешно получена"
+          description: Статистика мероприятия успешно получена
           schema:
             $ref: "#/definitions/EventStatistics"
 
         "400":
-          description: "Некорректно указан eventId или период статистики"
+          description: Некорректно указан период статистики
           schema:
             $ref: "#/definitions/ErrorResponse"
 
         "404":
-          description: "Мероприятие с указанным eventId не найдено"
+          description: Мероприятие с указанным eventId не найдено
           schema:
             $ref: "#/definitions/ErrorResponse"
 
         "500":
-          description: "Внутренняя ошибка сервиса"
+          description: Внутренняя ошибка сервиса
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -184,160 +184,160 @@ paths:
 definitions:
 
   CapacityRequest:
-    type: "object"
+    type: object
     required:
-    - "eventId"
-    - "totalTickets"
-  
+    - eventId
+    - totalTickets
+
     properties:
       eventId:
-        type: "string"
-  
+        type: string
+
       totalTickets:
-        type: "integer"
+        type: integer
 
 
   CreateSaleRequest:
-    type: "object"
+    type: object
     required:
-    - "eventId"
-    - "ticketId"
-    - "price"
-    - "purchasedAt"
+    - eventId
+    - ticketId
+    - price
+    - purchasedAt
 
     properties:
       eventId:
-        type: "string"
+        type: string
 
       ticketId:
-        type: "string"
+        type: string
 
       price:
-        type: "number"
+        type: number
 
       purchasedAt:
-        type: "string"
+        type: string
 
 
   Sale:
-    type: "object"
+    type: object
 
     properties:
       saleId:
-        type: "string"
+        type: string
 
 
   CancellationRequest:
-    type: "object"
+    type: object
     required:
-    - "saleId"
-    - "cancelledAt"
+    - saleId
+    - cancelledAt
 
     properties:
       saleId:
-        type: "string"
+        type: string
 
       cancelledAt:
-        type: "string"
+        type: string
 
 
   Cancellation:
-    type: "object"
+    type: object
 
     properties:
       cancellationId:
-        type: "string"
+        type: string
 
 
   EventStatistics:
-    type: "object"
+    type: object
     required:
-    - "totalTickets"
-    - "soldTickets"
-    - "availableTickets"
-    - "cancelledSales"
-    - "totalRevenue"
-    - "salesPerHour"
-    - "salesPerDay"
-    - "revenuePerHour"
-    - "revenuePerDay"
-    - "updatedAt"
+    - totalTickets
+    - soldTickets
+    - availableTickets
+    - cancelledSales
+    - totalRevenue
+    - salesPerHour
+    - salesPerDay
+    - revenuePerHour
+    - revenuePerDay
+    - updatedAt
 
     properties:
 
       totalTickets:
-        type: "integer"
+        type: integer
 
       soldTickets:
-        type: "integer"
+        type: integer
 
       availableTickets:
-        type: "integer"
+        type: integer
 
       cancelledSales:
-        type: "integer"
+        type: integer
 
       totalRevenue:
-        type: "number"
+        type: number
 
       salesPerHour:
-        type: "array"
+        type: array
         items:
           $ref: "#/definitions/SalesPeriod"
 
       salesPerDay:
-        type: "array"
+        type: array
         items:
           $ref: "#/definitions/SalesPeriod"
 
       revenuePerHour:
-        type: "array"
+        type: array
         items:
           $ref: "#/definitions/RevenuePeriod"
 
       revenuePerDay:
-        type: "array"
+        type: array
         items:
           $ref: "#/definitions/RevenuePeriod"
 
       updatedAt:
-        type: "string"
+        type: string
 
 
   SalesPeriod:
-    type: "object"
+    type: object
 
     properties:
       periodStart:
-        type: "string"
+        type: string
 
       periodEnd:
-        type: "string"
+        type: string
 
       soldTickets:
-        type: "integer"
+        type: integer
 
 
   RevenuePeriod:
-    type: "object"
+    type: object
 
     properties:
       periodStart:
-        type: "string"
+        type: string
 
       periodEnd:
-        type: "string"
+        type: string
 
       revenue:
-        type: "number"
+        type: number
 
 
   ErrorResponse:
-    type: "object"
+    type: object
 
     properties:
       code:
-        type: "string"
+        type: string
 
       message:
-        type: "string"
+        type: string
