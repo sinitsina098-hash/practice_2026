@@ -120,7 +120,7 @@ aliases:
 
 :::
 
-[mermaid:./shablon.mermaid::780px:464px::780px]
+[mermaid:./_index.mermaid::780px:464px::780px]
 
 ### Level 2 -- Containers
 
@@ -136,7 +136,7 @@ aliases:
 
 :::
 
-[mermaid:./shablon-2.mermaid::780px:566px::780px]
+[mermaid:./_index-2.mermaid::780px:566px::780px]
 
 ## 🚩 4. Главный риск выбранного решения
 
