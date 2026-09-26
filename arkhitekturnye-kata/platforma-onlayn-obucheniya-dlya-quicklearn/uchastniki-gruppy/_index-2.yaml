@@ -1,198 +1,386 @@
-openapi: "3.0.1"
-info:
-  version:  1.0.0 | 01.04.2024
-  title: Наименование сервиса
-  description: Краткое описание api-интерфейса сервиса
-security:
-  - BearerAuth: []
-  - OAuth2: []
-servers:
-  - url: /api/v1
-  - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
-    variables:
-        Host:
-          default: host.ru
-          description: Host на котором развернут микросервис
-        EnvironmentPrefix:
-          default: ''
-          description: |
-            Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
-            Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
-        MicroserviceName:
-          default: microservice
-          description: |
-            Имя под которым микросервис развернут в кластере микросервисов
-            Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
-tags:
-    - name: resources operations
-      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с информацией по ресурсам стоит тэгировать как resources operations
-paths:
-  /resources:
-    get:
-      tags: 
-        - resources operations
-      operationId: GetResource
-      summary: Получить список ресурсов
-      description: Метод возвращает список ресурсов. При запросе можно отфильтровать список
-      parameters:
-        - in: query
-          name: resourceFilter
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceFilter"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ResourcesRp"
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+openapi: 3.0.0
 
+info:
+  title: QuickFix Rating Service API
+  description: >
+    API микросервиса Rating Service системы QuickFix.
+    Микросервис отвечает за создание оценок и отзывов о мастерах,
+    получение рейтинга мастера, получение отзывов и отображение
+    мастеру его собственного рейтинга и отзывов.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081/api
+    description: Локальный сервер Rating Service
+
+tags:
+  - name: Ratings
+    description: Создание оценок и отзывов о мастерах
+
+  - name: Masters
+    description: Получение рейтинга и отзывов мастеров
+
+
+paths:
+
+  /ratings:
     post:
-      tags: 
-        - resources operations
-      operationId: CreateResource
-      summary: Создать объект
-      description: Метод создает объект с его уникальным идентификатором
+      tags:
+        - Ratings
+
+      summary: Создать оценку мастеру
+
+      description: >
+        Создаёт оценку и текстовый отзыв о мастере
+        после завершения заявки.
+        Одну завершённую заявку можно оценить только один раз.
+
+      operationId: createRating
+
       requestBody:
+        description: Данные оценки мастера
+        required: true
+
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResourcesRp'
+              $ref: '#/components/schemas/CreateRatingRequest'
+
       responses:
-        201:
-          description: Created
+
+        '201':
+          description: Оценка успешно сохранена
+
           content:
             application/json:
               schema:
-                  $ref: '#/components/parameters/resourceId'
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-  /resources/{resourceId}:  
-    delete:
-      tags: 
-        - resources operations
-      operationId: deleteResource
-      summary: Удалить объект по его идентификатору
-      description: Метод удаляет объект по его идентификатору
+                $ref: '#/components/schemas/CreateRatingResponse'
+
+        '400':
+          description: Некорректные входные данные
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        '404':
+          description: Заявка, заказчик или мастер не найдены
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        '409':
+          description: Данная заявка уже была оценена
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /masters/{masterId}/rating:
+    get:
+      tags:
+        - Masters
+
+      summary: Получить рейтинг мастера
+
+      description: >
+        Возвращает текущий средний рейтинг мастера
+        и количество полученных им оценок.
+
+      operationId: getMasterRating
+
       parameters:
-        - in: path
-          name: resourceId
+        - name: masterId
+          in: path
+          description: Идентификатор мастера
           required: true
+
           schema:
-            $ref: "#/components/parameters/resourceId"
+            type: integer
+            format: int64
+
       responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-    put:
-      tags: 
-        - resources operations
-      operationId: UpdateResource
-      summary: Обновить объект
-      description: Метод обновляет объект по его идентификатору по атрибутам переданным в запросе
+
+        '200':
+          description: Рейтинг мастера успешно получен
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterRating'
+
+        '404':
+          description: Данные о мастере не найдены
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /masters/{masterId}/reviews:
+    get:
+      tags:
+        - Masters
+
+      summary: Получить отзывы о мастере
+
+      description: >
+        Возвращает список оценок и текстовых отзывов
+        о выбранном мастере.
+
+      operationId: getMasterReviews
+
       parameters:
-        - in: path
-          name: resourceId
+        - name: masterId
+          in: path
+          description: Идентификатор мастера
           required: true
+
           schema:
-            $ref: "#/components/parameters/resourceId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceRq'
-              
+            type: integer
+            format: int64
+
       responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+
+        '200':
+          description: Список отзывов успешно получен
+
+          content:
+            application/json:
+              schema:
+                type: array
+
+                items:
+                  $ref: '#/components/schemas/Review'
+
+        '404':
+          description: Данные о мастере не найдены
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /masters/{masterId}/rating-profile:
+    get:
+      tags:
+        - Masters
+
+      summary: Получить собственный рейтинг и отзывы мастера
+
+      description: >
+        Возвращает средний рейтинг, количество оценок
+        и список отзывов текущего мастера.
+        Метод используется для отображения мастеру
+        информации о его рейтинге.
+
+      operationId: getMasterRatingProfile
+
+      parameters:
+        - name: masterId
+          in: path
+          description: Идентификатор мастера
+          required: true
+
+          schema:
+            type: integer
+            format: int64
+
+      responses:
+
+        '200':
+          description: Рейтинг и отзывы мастера успешно получены
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterRatingProfile'
+
+        '404':
+          description: Данные о мастере не найдены
+
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
 components:
-  securitySchemes:
-      BearerAuth:
-          type: http
-          scheme: bearer
-          bearerFormat: JWT
-      OAuth2:
-         type: oauth2
-         flows:
-          password:
-            tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
-            scopes: {}
-  parameters:  
-    resourceId:
-      name: resourceId
-      in: path
-      description: Уникальный идентификатор
-      required: true
-      schema:
-        type: string
-        format: uuid
-    resourceFilter:
-      name: resourceFilter
-      in: query
-      description: Фильтр параметр
-      required: true
-      schema:
-        $ref: '#/components/schemas/resourceFilter'
+
   schemas:
-    resourceFilter:
-      description: Фильтр параметр ресурса
-      type: string
-    ResourcesRp: 
-        description: Список объектов ресурс
-        type: array
-        items:
-          $ref: '#/components/schemas/Resource'
-    Resource:
+
+    CreateRatingRequest:
       type: object
-      description: Объект ресурс
-      required: 
-        - resourceId
+
+      required:
+        - orderId
+        - customerId
+        - masterId
+        - score
+
       properties:
-        Att1:
-         type: string
-         description: Простой атрибут типа строка
-        Att2:
-         type: integer
-         description: Простой атрибут типа число
-        Att3:
-         type: boolean
-         description: Простой атрибут булевого типа
-    ResourceRq:
-      $ref: '#/components/schemas/Resource'
-    
-   
+
+        orderId:
+          type: integer
+          format: int64
+          description: Идентификатор завершённой заявки
+          example: 152
+
+        customerId:
+          type: integer
+          format: int64
+          description: Идентификатор заказчика
+          example: 35
+
+        masterId:
+          type: integer
+          format: int64
+          description: Идентификатор мастера
+          example: 18
+
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Оценка работы мастера от 1 до 5
+          example: 5
+
+        comment:
+          type: string
+          description: Текстовый отзыв заказчика
+          example: Мастер быстро и качественно выполнил работу
+
+
+    CreateRatingResponse:
+      type: object
+
+      properties:
+
+        ratingId:
+          type: integer
+          format: int64
+          description: Идентификатор созданной оценки
+          example: 73
+
+        result:
+          type: string
+          description: Результат сохранения оценки
+          example: Оценка успешно сохранена
+
+
+    MasterRating:
+      type: object
+
+      properties:
+
+        masterId:
+          type: integer
+          format: int64
+          description: Идентификатор мастера
+          example: 18
+
+        averageRating:
+          type: number
+          format: double
+          description: Средний рейтинг мастера
+          example: 4.8
+
+        ratingsCount:
+          type: integer
+          description: Количество полученных мастером оценок
+          example: 27
+
+
+    Review:
+      type: object
+
+      properties:
+
+        ratingId:
+          type: integer
+          format: int64
+          description: Идентификатор оценки
+          example: 73
+
+        customerId:
+          type: integer
+          format: int64
+          description: Идентификатор заказчика, оставившего отзыв
+          example: 35
+
+        masterId:
+          type: integer
+          format: int64
+          description: Идентификатор мастера
+          example: 18
+
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Оценка работы мастера
+          example: 5
+
+        comment:
+          type: string
+          description: Текст отзыва
+          example: Мастер быстро и качественно выполнил работу
+
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания оценки
+          example: '2026-09-26T12:00:00Z'
+
+
+    MasterRatingProfile:
+      type: object
+
+      properties:
+
+        masterId:
+          type: integer
+          format: int64
+          description: Идентификатор мастера
+          example: 18
+
+        averageRating:
+          type: number
+          format: double
+          description: Средний рейтинг мастера
+          example: 4.8
+
+        ratingsCount:
+          type: integer
+          description: Количество полученных оценок
+          example: 27
+
+        reviews:
+          type: array
+          description: Список оценок и отзывов мастера
+
+          items:
+            $ref: '#/components/schemas/Review'
+
+
+    Error:
+      type: object
+
+      properties:
+
+        code:
+          type: string
+          description: Код ошибки
+          example: ERROR_CODE
+
+        message:
+          type: string
+          description: Описание ошибки
+          example: Описание возникшей ошибки
