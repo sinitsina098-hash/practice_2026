@@ -1,6 +1,6 @@
 ---
 order: 3
-title: "Ивашнева Полина Ивановна\_MS Parking Session (Микросервис управления парковочными сессиями)"
+title: ФИО Шаблон
 ---
 
 ---
@@ -246,4 +246,4 @@ title: "Ивашнева Полина Ивановна_MS Cartography Service"
 
 [openapi:./_index-2.yaml:true]
 
-### 
+###
