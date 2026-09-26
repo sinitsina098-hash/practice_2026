@@ -1,8 +1,11 @@
 openapi: "3.0.1"
 info:
-  version:  1.0.0 | 01.04.2024
-  title: Наименование сервиса
-  description: Краткое описание api-интерфейса сервиса
+  version: 1.0.0 | 26.09.2026
+  title: EduPath. Тестирование и результаты
+  description: |
+    Api-интерфейс функциональной зоны «Тестирование и результаты» платформы онлайн-курсов EduPath.
+    Зона отвечает за итоговые тесты курса: создание теста преподавателем, запуск попытки студентом,
+    отправку ответов, расчёт оценки и выдачу результатов другим модулям монолита.
 security:
   - BearerAuth: []
   - OAuth2: []
@@ -11,42 +14,173 @@ servers:
   - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
     variables:
         Host:
-          default: host.ru
-          description: Host на котором развернут микросервис
+          default: edupath.ru
+          description: Host на котором развернут сервис
         EnvironmentPrefix:
           default: ''
           description: |
             Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
-            Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
+            Фактически позволяет окончательно идентифицировать host сервиса
+
         MicroserviceName:
-          default: microservice
+          default: assessment
           description: |
-            Имя под которым микросервис развернут в кластере микросервисов
-            Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
+            Имя под которым сервис развернут в кластере
+            Фактически позволяет окончательно идентифицировать host сервиса при обращениях к нему
 tags:
-    - name: resources operations
-      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с информацией по ресурсам стоит тэгировать как resources operations
+    - name: tests operations
+      description: Методы работы с итоговыми тестами курса
+    - name: attempts operations
+      description: Методы работы с попытками прохождения теста
+    - name: results operations
+      description: Методы получения результатов тестирования
 paths:
-  /resources:
-    get:
-      tags: 
-        - resources operations
-      operationId: GetResource
-      summary: Получить список ресурсов
-      description: Метод возвращает список ресурсов. При запросе можно отфильтровать список
+  /courses/{courseId}/tests:
+    post:
+      tags:
+        - tests operations
+      operationId: CreateCourseTest
+      summary: Создать итоговый тест курса
+      description: Метод создает итоговый тест курса с вопросами и проходным баллом и возвращает его уникальный идентификатор. Вызывается frontend от имени преподавателя
       parameters:
-        - in: query
-          name: resourceFilter
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceFilter"
+        - $ref: "#/components/parameters/courseId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestRq'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestRp'
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        404:
+          description: Not Found
+        500:
+          description: Internal Service Error
+
+  /tests/{testId}/attempts:
+    post:
+      tags:
+        - attempts operations
+      operationId: CreateTestAttempt
+      summary: Начать попытку прохождения теста
+      description: |
+        Метод создает попытку прохождения итогового теста и возвращает список вопросов без правильных ответов.
+        Перед созданием проверяется, что курс пройден и лимит попыток не исчерпан.
+        Повторный запрос с тем же значением Idempotency-Key возвращает ранее созданную попытку и новую не создает.
+        Вызывается frontend от имени студента
+      parameters:
+        - $ref: "#/components/parameters/testId"
+        - $ref: "#/components/parameters/idempotencyKey"
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptRp'
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        404:
+          description: Not Found
+        500:
+          description: Internal Service Error
+
+  /attempts/{attemptId}:
+    get:
+      tags:
+        - attempts operations
+      operationId: GetAttempt
+      summary: Получить попытку по её идентификатору
+      description: Метод возвращает статус попытки и её результат. Вызывается frontend от имени студента на странице результатов теста
+      parameters:
+        - $ref: "#/components/parameters/attemptId"
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResourcesRp"
+                $ref: '#/components/schemas/AttemptStateRp'
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+        404:
+          description: Not Found
+        500:
+          description: Internal Service Error
+
+  /attempts/{attemptId}/submit:
+    post:
+      tags:
+        - attempts operations
+      operationId: SubmitTestAttempt
+      summary: Отправить ответы на проверку
+      description: |
+        Метод принимает ответы студента, проверяет их, рассчитывает балл и признак прохождения теста и закрывает попытку.
+        Повторная отправка уже завершенной или просроченной попытки возвращает 409.
+        Вызывается frontend от имени студента
+      parameters:
+        - $ref: "#/components/parameters/attemptId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswersRq'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResultRp'
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        404:
+          description: Not Found
+        409:
+          description: Conflict
+        500:
+          description: Internal Service Error
+
+  /test-results:
+    get:
+      tags:
+        - results operations
+      operationId: GetTestResults
+      summary: Получить результаты тестирования студента по курсу
+      description: Метод возвращает результаты попыток студента по курсу и признак того, что итоговый тест сдан. Вызывается модулем «Сертификаты» перед выпуском сертификата
+      parameters:
+        - $ref: "#/components/parameters/courseIdFilter"
+        - $ref: "#/components/parameters/studentIdFilter"
+        - $ref: "#/components/parameters/statusFilter"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResultsRp'
         400:
           description: Bad Request
         401:
@@ -56,90 +190,6 @@ paths:
         500:
           description: Internal Service Error
 
-    post:
-      tags: 
-        - resources operations
-      operationId: CreateResource
-      summary: Создать объект
-      description: Метод создает объект с его уникальным идентификатором
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourcesRp'
-      responses:
-        201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/parameters/resourceId'
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-  /resources/{resourceId}:  
-    delete:
-      tags: 
-        - resources operations
-      operationId: deleteResource
-      summary: Удалить объект по его идентификатору
-      description: Метод удаляет объект по его идентификатору
-      parameters:
-        - in: path
-          name: resourceId
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceId"
-      responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-    put:
-      tags: 
-        - resources operations
-      operationId: UpdateResource
-      summary: Обновить объект
-      description: Метод обновляет объект по его идентификатору по атрибутам переданным в запросе
-      parameters:
-        - in: path
-          name: resourceId
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceRq'
-              
-      responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
 components:
   securitySchemes:
       BearerAuth:
@@ -150,49 +200,327 @@ components:
          type: oauth2
          flows:
           password:
-            tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
+            tokenUrl: https://auth.edupath.ru/auth/realms/edupath/protocol/openid-connect/token
             scopes: {}
-  parameters:  
-    resourceId:
-      name: resourceId
+  parameters:
+    courseId:
+      name: courseId
       in: path
-      description: Уникальный идентификатор
+      description: Уникальный идентификатор курса
       required: true
       schema:
         type: string
         format: uuid
-    resourceFilter:
-      name: resourceFilter
-      in: query
-      description: Фильтр параметр
+    testId:
+      name: testId
+      in: path
+      description: Уникальный идентификатор итогового теста
       required: true
       schema:
-        $ref: '#/components/schemas/resourceFilter'
+        type: string
+        format: uuid
+    attemptId:
+      name: attemptId
+      in: path
+      description: Уникальный идентификатор попытки
+      required: true
+      schema:
+        type: string
+        format: uuid
+    idempotencyKey:
+      name: Idempotency-Key
+      in: header
+      description: Уникальный ключ запроса от клиента. Защищает от создания двух попыток при повторном нажатии кнопки
+      required: true
+      schema:
+        type: string
+        format: uuid
+    courseIdFilter:
+      name: courseId
+      in: query
+      description: Фильтр по курсу
+      required: true
+      schema:
+        type: string
+        format: uuid
+    studentIdFilter:
+      name: studentId
+      in: query
+      description: Фильтр по студенту
+      required: true
+      schema:
+        type: string
+        format: uuid
+    statusFilter:
+      name: status
+      in: query
+      description: Фильтр по признаку прохождения теста
+      required: false
+      schema:
+        $ref: '#/components/schemas/resultStatusFilter'
+
   schemas:
-    resourceFilter:
-      description: Фильтр параметр ресурса
+    resultStatusFilter:
+      description: Фильтр параметр по признаку прохождения теста
       type: string
-    ResourcesRp: 
-        description: Список объектов ресурс
-        type: array
-        items:
-          $ref: '#/components/schemas/Resource'
-    Resource:
+      enum:
+        - passed
+        - failed
+
+    Option:
       type: object
-      description: Объект ресурс
-      required: 
-        - resourceId
+      description: Вариант ответа на вопрос
+      required:
+        - optionId
+        - text
       properties:
-        Att1:
-         type: string
-         description: Простой атрибут типа строка
-        Att2:
-         type: integer
-         description: Простой атрибут типа число
-        Att3:
-         type: boolean
-         description: Простой атрибут булевого типа
-    ResourceRq:
-      $ref: '#/components/schemas/Resource'
-    
-   
+        optionId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор варианта ответа
+        text:
+          type: string
+          description: Текст варианта ответа
+
+    NewQuestion:
+      type: object
+      description: Вопрос теста в том виде, в каком его заводит преподаватель
+      required:
+        - text
+        - options
+        - correctOptionIds
+      properties:
+        text:
+          type: string
+          description: Текст вопроса
+        options:
+          type: array
+          description: Варианты ответа
+          items:
+            $ref: '#/components/schemas/Option'
+        correctOptionIds:
+          type: array
+          description: Идентификаторы правильных вариантов ответа. Студенту не возвращаются
+          items:
+            type: string
+            format: uuid
+
+    Question:
+      type: object
+      description: Вопрос теста в том виде, в каком он отдается студенту, — без правильных ответов
+      required:
+        - questionId
+        - text
+      properties:
+        questionId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор вопроса
+        text:
+          type: string
+          description: Текст вопроса
+        options:
+          type: array
+          description: Варианты ответа
+          items:
+            $ref: '#/components/schemas/Option'
+
+    Answer:
+      type: object
+      description: Ответ студента на один вопрос
+      required:
+        - questionId
+        - selectedOptionIds
+      properties:
+        questionId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор вопроса
+        selectedOptionIds:
+          type: array
+          description: Идентификаторы выбранных студентом вариантов ответа
+          items:
+            type: string
+            format: uuid
+
+    Test:
+      type: object
+      description: Объект итоговый тест курса
+      required:
+        - title
+        - passingScore
+        - questions
+      properties:
+        title:
+          type: string
+          description: Название теста
+        passingScore:
+          type: integer
+          description: Проходной балл в процентах
+        timeLimitMinutes:
+          type: integer
+          description: Ограничение времени на одну попытку в минутах
+        maxAttempts:
+          type: integer
+          description: Максимальное количество попыток на студента
+        questions:
+          type: array
+          description: Вопросы теста
+          items:
+            $ref: '#/components/schemas/NewQuestion'
+
+    TestRq:
+      $ref: '#/components/schemas/Test'
+
+    TestRp:
+      type: object
+      description: Созданный итоговый тест курса
+      required:
+        - testId
+      properties:
+        testId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор теста
+        courseId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор курса
+        questionCount:
+          type: integer
+          description: Количество вопросов в тесте
+        passingScore:
+          type: integer
+          description: Проходной балл в процентах
+
+    AttemptRp:
+      type: object
+      description: Созданная попытка прохождения теста с вопросами
+      required:
+        - attemptId
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор попытки
+        testId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор теста
+        attemptNumber:
+          type: integer
+          description: Порядковый номер попытки студента по этому тесту
+        expiresAt:
+          type: string
+          format: date-time
+          description: Момент, после которого ответы по попытке не принимаются
+        questions:
+          type: array
+          description: Вопросы теста без правильных ответов
+          items:
+            $ref: '#/components/schemas/Question'
+
+    AnswersRq:
+      type: object
+      description: Ответы студента, отправляемые на проверку
+      required:
+        - answers
+      properties:
+        answers:
+          type: array
+          description: Список ответов на вопросы теста
+          items:
+            $ref: '#/components/schemas/Answer'
+
+    AttemptStatus:
+      type: string
+      description: Статус попытки
+      enum:
+        - IN_PROGRESS
+        - SUBMITTED
+        - EXPIRED
+
+    TestResultRp:
+      type: object
+      description: Результат проверки одной попытки
+      required:
+        - attemptId
+        - passed
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор попытки
+        testId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор теста
+        score:
+          type: integer
+          description: Количество правильных ответов
+        maxScore:
+          type: integer
+          description: Максимально возможное количество баллов
+        percent:
+          type: number
+          description: Процент правильных ответов
+        passed:
+          type: boolean
+          description: Признак того, что тест сдан
+        submittedAt:
+          type: string
+          format: date-time
+          description: Дата и время отправки ответов
+
+    AttemptStateRp:
+      type: object
+      description: Состояние попытки и её результат
+      required:
+        - attemptId
+        - status
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор попытки
+        testId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор теста
+        studentId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор студента
+        attemptNumber:
+          type: integer
+          description: Порядковый номер попытки студента по этому тесту
+        status:
+          $ref: '#/components/schemas/AttemptStatus'
+        result:
+          $ref: '#/components/schemas/TestResultRp'
+
+    TestResultsRp:
+      type: object
+      description: Результаты тестирования студента по курсу
+      required:
+        - passed
+      properties:
+        courseId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор курса
+        studentId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор студента
+        bestPercent:
+          type: number
+          description: Лучший процент правильных ответов среди попыток студента
+        passed:
+          type: boolean
+          description: Признак того, что итоговый тест курса сдан
+        items:
+          type: array
+          description: Список результатов попыток
+          items:
+            $ref: '#/components/schemas/TestResultRp'
