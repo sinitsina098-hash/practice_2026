@@ -135,4 +135,4 @@ Availability Service (Сервис доступности и расписани�
 
 [openapi:./_index-3.yaml:true]
 
-### 
+###

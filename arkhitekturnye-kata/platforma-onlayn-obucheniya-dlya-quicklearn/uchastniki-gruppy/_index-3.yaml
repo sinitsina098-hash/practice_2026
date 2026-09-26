@@ -1,31 +1,20 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Availability Service API (Сервис доступности и расписания мастеров)
-  description: >
-    REST API для управления регулярным расписанием работы мастеров, исключениями
-    (отпуск, больничный, доп. смена) и их текущим статусом доступности в реальном
-    времени в платформе QuickFix.
+  title: Availability Service
   version: 1.0.0
 servers:
   - url: https://api.quickfix.ru/availability/v1
-tags:
-  - name: masters
-    description: >
-      Расписание и доступность мастеров — регулярный график, исключения и
-      текущий статус (свободен / занят / офлайн).
-security:
-  - bearerAuth: []
 
 paths:
   /masters/{masterId}/schedule:
     get:
-      tags: [masters]
-      summary: Получить регулярное расписание мастера
-      description: >
-        Возвращает регулярное расписание работы мастера (рабочие дни и часы)
-        вместе со списком активных исключений (отпуск, доп. смены).
+      summary: Получить расписание мастера
       parameters:
-        - $ref: '#/components/parameters/masterId'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -34,175 +23,70 @@ paths:
               schema:
                 $ref: '#/components/schemas/WeeklySchedule'
         '404':
-          description: Мастер с указанным masterId не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          description: Мастер не найден
+
     put:
-      tags: [masters]
-      summary: Задать/обновить регулярное расписание
-      description: >
-        Полностью заменяет регулярное расписание мастера — набор рабочих дней
-        недели и часов приёма заявок.
+      summary: Обновить расписание мастера
       parameters:
-        - $ref: '#/components/parameters/masterId'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/WeeklyScheduleInput'
       responses:
         '200':
-          description: Обновлённое расписание
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WeeklySchedule'
+          description: Обновлено
         '400':
-          description: Пересекающиеся или некорректные интервалы времени
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Мастер не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          description: Ошибка
 
   /masters/{masterId}/schedule/exceptions:
     post:
-      tags: [masters]
-      summary: Добавить исключение в расписание
-      description: >
-        Регистрирует разовое отклонение от регулярного расписания — отпуск,
-        больничный или дополнительную смену на конкретную дату.
+      summary: Добавить исключение
       parameters:
-        - $ref: '#/components/parameters/masterId'
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ScheduleExceptionInput'
       responses:
         '201':
-          description: Созданное исключение
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ScheduleException'
+          description: Создано
         '400':
-          description: Не заполнены обязательные поля или неверная дата
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /masters/{masterId}/schedule/exceptions/{exceptionId}:
-    delete:
-      tags: [masters]
-      summary: Удалить исключение из расписания
-      description: >
-        Отменяет ранее добавленное исключение — например, мастер передумал
-        брать выходной.
-      parameters:
-        - $ref: '#/components/parameters/masterId'
-        - name: exceptionId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Идентификатор исключения
-      responses:
-        '204':
-          description: Исключение успешно удалено
-        '404':
-          description: Исключение не найдено
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /masters/{masterId}/status:
-    patch:
-      tags: [masters]
-      summary: Изменить статус доступности мастера
-      description: >
-        Обновляет текущий статус мастера — вручную (мастер вышел на смену /
-        ушёл офлайн) или автоматически, по вызову Сервиса заявок при
-        назначении и завершении заявки.
-      parameters:
-        - $ref: '#/components/parameters/masterId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateStatusInput'
-      responses:
-        '200':
-          description: Актуальный статус мастера
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MasterStatus'
-        '404':
-          description: Мастер не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: 'Недопустимый переход статуса (например, OFFLINE → ONLINE_BUSY)'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          description: Ошибка
 
   /masters/available:
     get:
-      tags: [masters]
-      summary: Получить список доступных мастеров сейчас
-      description: >
-        Возвращает мастеров в статусе ONLINE_FREE по заданной категории услуги
-        в радиусе от указанных координат. Используется Сервисом заявок для
-        подбора мастера под новую заявку.
+      summary: Список свободных мастеров
       parameters:
         - name: category
           in: query
-          required: true
           schema:
             type: string
-            enum: [PLUMBING, ELECTRICIAN, FURNITURE]
-          description: Категория услуги
         - name: lat
           in: query
-          required: true
           schema:
             type: number
-            format: double
-          description: Широта заказчика
         - name: lon
           in: query
-          required: true
           schema:
             type: number
-            format: double
-          description: Долгота заказчика
         - name: radiusKm
           in: query
-          required: false
           schema:
             type: number
-            default: 5
-          description: Радиус поиска, км
       responses:
         '200':
-          description: Список доступных мастеров
+          description: OK
           content:
             application/json:
               schema:
@@ -210,172 +94,64 @@ paths:
                 items:
                   $ref: '#/components/schemas/AvailableMasterItem'
         '400':
-          description: Не переданы обязательные параметры
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          description: Ошибка
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
-  parameters:
-    masterId:
-      name: masterId
-      in: path
-      required: true
-      schema:
-        type: string
-      description: Идентификатор мастера
-
   schemas:
-    DaySchedule:
-      type: object
-      properties:
-        dayOfWeek:
-          type: string
-          enum: [MON, TUE, WED, THU, FRI, SAT, SUN]
-        startTime:
-          type: string
-          example: "09:00"
-        endTime:
-          type: string
-          example: "18:00"
-
     WeeklySchedule:
       type: object
       properties:
         masterId:
           type: string
-          description: Идентификатор мастера
         days:
           type: array
           items:
-            $ref: '#/components/schemas/DaySchedule'
-          description: 'Список рабочих дней: {dayOfWeek, startTime, endTime}'
+            type: object
+            properties:
+              dayOfWeek:
+                type: string
+              startTime:
+                type: string
+              endTime:
+                type: string
         updatedAt:
           type: string
-          format: date-time
-          description: Дата последнего обновления расписания
 
     WeeklyScheduleInput:
       type: object
-      required: [days]
       properties:
         days:
           type: array
           items:
-            $ref: '#/components/schemas/DaySchedule'
-          description: Список рабочих дней недели с часами приёма заявок
-
-    ScheduleException:
-      type: object
-      properties:
-        exceptionId:
-          type: string
-          format: uuid
-          description: Идентификатор исключения
-        masterId:
-          type: string
-          description: Идентификатор мастера
-        date:
-          type: string
-          format: date
-          description: Дата, на которую действует исключение
-        type:
-          type: string
-          enum: [DAY_OFF, EXTRA_SHIFT]
-        startTime:
-          type: string
-          nullable: true
-          description: Начало интервала (для EXTRA_SHIFT)
-        endTime:
-          type: string
-          nullable: true
-          description: Конец интервала (для EXTRA_SHIFT)
-        createdAt:
-          type: string
-          format: date-time
-          description: Дата создания записи
+            type: object
+            properties:
+              dayOfWeek:
+                type: string
+              startTime:
+                type: string
+              endTime:
+                type: string
 
     ScheduleExceptionInput:
       type: object
-      required: [date, type]
       properties:
         date:
           type: string
-          format: date
-          description: Дата исключения
         type:
           type: string
-          enum: [DAY_OFF, EXTRA_SHIFT]
         startTime:
           type: string
-          nullable: true
-          description: Начало интервала (для EXTRA_SHIFT)
         endTime:
           type: string
-          nullable: true
-          description: Конец интервала (для EXTRA_SHIFT)
-
-    MasterStatus:
-      type: object
-      properties:
-        masterId:
-          type: string
-          description: Идентификатор мастера
-        status:
-          type: string
-          enum: [ONLINE_FREE, ONLINE_BUSY, OFFLINE]
-        activeRequestId:
-          type: string
-          nullable: true
-          description: Заявка, из-за которой мастер занят
-        updatedAt:
-          type: string
-          format: date-time
-          description: Дата последнего изменения статуса
-
-    UpdateStatusInput:
-      type: object
-      required: [status]
-      properties:
-        status:
-          type: string
-          enum: [ONLINE_FREE, ONLINE_BUSY, OFFLINE]
-        requestId:
-          type: string
-          description: Заявка-инициатор автоматического перехода статуса
 
     AvailableMasterItem:
       type: object
       properties:
         masterId:
           type: string
-          description: Идентификатор мастера
         category:
           type: string
-          enum: [PLUMBING, ELECTRICIAN, FURNITURE]
         distanceKm:
           type: number
-          format: float
-          description: Расстояние до заказчика, км
         status:
           type: string
-          enum: [ONLINE_FREE]
-          description: Текущий статус (в этой выборке всегда ONLINE_FREE)
-
-    Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Код ошибки
-        message:
-          type: string
-          description: Человекочитаемое описание ошибки
-          
