@@ -1,8 +1,8 @@
 openapi: "3.0.1"
 info:
   version:  1.0.0 | 01.04.2024
-  title: Наименование сервиса
-  description: Краткое описание api-интерфейса сервиса
+  title: Взаимодействие с пользователем
+  description: Регистрация, вход в систему и удаление аккаунта
 security:
   - BearerAuth: []
   - OAuth2: []
@@ -19,7 +19,7 @@ servers:
             Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
             Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
         MicroserviceName:
-          default: microservice
+          default: UserInteraction
           description: |
             Имя под которым микросервис развернут в кластере микросервисов
             Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
@@ -59,9 +59,9 @@ paths:
     post:
       tags: 
         - resources operations
-      operationId: CreateResource
-      summary: Создать объект
-      description: Метод создает объект с его уникальным идентификатором
+      operationId: CreateUser
+      summary: Создать аккаунт пользователя
+      description: Метод создает аккаунт
       requestBody:
         content:
           application/json:
@@ -88,9 +88,9 @@ paths:
     delete:
       tags: 
         - resources operations
-      operationId: deleteResource
-      summary: Удалить объект по его идентификатору
-      description: Метод удаляет объект по его идентификатору
+      operationId: deleteUser
+      summary: Удалить аккаунт
+      description: Метод удаляет аккаунт по его идентификаторам
       parameters:
         - in: path
           name: resourceId
