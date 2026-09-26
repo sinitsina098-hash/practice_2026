@@ -45,6 +45,7 @@ paths:
                     type: string
                   customerId:
                     type: integer
+                    format: int64
                   category:
                     type: string
                   description:
@@ -55,3 +56,6 @@ paths:
           description: Некорректные входные данные
         '401':
           description: Отсутствует или недействителен токен доступа
+        '500':
+          description: Ошибка сервера
+      
