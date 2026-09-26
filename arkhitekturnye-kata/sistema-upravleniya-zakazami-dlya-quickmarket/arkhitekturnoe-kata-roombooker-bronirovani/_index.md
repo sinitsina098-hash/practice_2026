@@ -117,7 +117,7 @@ order: 1
 
 :::
 
-![](./arkhitekturnoe-kata-roombooker-bronirovani-3.webp){width=2600px height=825px}
+![](./_index-3.webp){width=2600px height=825px}
 
 :::tip:true 
 
@@ -139,7 +139,7 @@ order: 1
 
 :::
 
-![](./arkhitekturnoe-kata-roombooker-bronirovani.webp){width=2600px height=1125px}
+![](./_index.webp){width=2600px height=1125px}
 
 ## 🚩 4. Главный риск выбранного решения
 
