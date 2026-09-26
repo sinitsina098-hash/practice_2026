@@ -9,10 +9,6 @@ servers:
 tags:
   - name: bookings operations
     description: Операции с бронированиями
-    roomId:
-          type: integer
-    userId:
-          type: integer
 paths:
   /bookings:
     post:
@@ -53,10 +49,13 @@ components:
     BookingRq:
       type: object
       required:
+        - userId
         - roomId
         - startTime
         - endTime
       properties:
+        userId:
+          type: integer
         roomId:
           type: integer
         startTime:
