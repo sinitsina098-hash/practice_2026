@@ -1,0 +1,80 @@
+openapi: 3.0.3
+info:
+  title: Payment Service
+  description: API микросервиса оплаты платформы QuickFix
+  version: 1.0.0
+security:
+  - BearerAuth: []
+servers:
+  - url: /api/v1
+paths:
+  /payments:
+    post:
+      summary: Оплатить выполненную работу
+      description: Создаёт платёж по выполненной заявке и возвращает ссылку на форму оплаты. Сумма берётся из заявки
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRq'
+      responses:
+        '201':
+          description: Платёж создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePaymentRp'
+        '400':
+          description: Invalid request (не передан orderId или неверный способ оплаты)
+        '401':
+          description: Unauthorized (нет или истёк токен)
+        '403':
+          description: Forbidden (заявка другого заказчика)
+        '404':
+          description: Not found (заявка не найдена)
+        '409':
+          description: Conflict (заявка не выполнена или уже оплачена)
+        '500':
+          description: Internal server error
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    CreatePaymentRq:
+      type: object
+      required:
+        - orderId
+        - paymentMethod
+      properties:
+        orderId:
+          type: string
+          format: uuid
+          description: Идентификатор заявки
+        paymentMethod:
+          type: string
+          enum:
+            - CARD
+            - SBP
+          description: Способ оплаты (карта / СБП)
+    CreatePaymentRp:
+      type: object
+      properties:
+        paymentId:
+          type: string
+          format: uuid
+          description: Идентификатор платежа
+        amount:
+          type: number
+          example: 2500.00
+          description: Сумма к оплате
+        status:
+          type: string
+          example: PENDING
+          description: Статус платежа
+        paymentUrl:
+          type: string
+          description: Ссылка на форму оплаты
