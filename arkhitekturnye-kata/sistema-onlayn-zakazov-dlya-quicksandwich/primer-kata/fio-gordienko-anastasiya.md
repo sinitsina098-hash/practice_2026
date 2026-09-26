@@ -6,7 +6,7 @@ title: Парамонова Елена
 
 ### 1\.1 Диаграмма компонентов архитектуры
 
-[mermaid:./fio-proektirovanie-api-2.mermaid::372px:278px]
+[mermaid:./fio-proektirovanie-api-2.mermaid::670px:306px]
 
 ### 1\.2 Описание микросервиса
 

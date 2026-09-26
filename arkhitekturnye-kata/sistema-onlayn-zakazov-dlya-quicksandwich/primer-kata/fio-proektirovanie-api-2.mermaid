@@ -1,4 +1,5 @@
 graph TD
-    WEB["Web Client"] --> API["API Gateway"]
-    API --> AUTH["Auth Service"]
-    API --> TEL["MS Telephony"]
+    WEB["SPA React Web App"] --> MONOLITH["Spring Boot Monolith"]
+    MONOLITH --> DB[("PostgreSQL Database")]
+    MONOLITH --> AD["Corporate AD / LDAP"]
+    MONOLITH --> SMTP_SERVER["SMTP Mail Server"]
