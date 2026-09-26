@@ -1,11 +1,16 @@
 openapi: "3.0.1"
 info:
   version: 1.0.0 | 26.09.2026
+<<<<<<< Updated upstream
   title: EduPath. Тестирование и результаты
   description: |
     Api-интерфейс функциональной зоны «Тестирование и результаты» платформы онлайн-курсов EduPath.
     Зона отвечает за итоговые тесты курса: создание теста преподавателем, запуск попытки студентом,
     отправку ответов, расчёт оценки и выдачу результатов другим модулям монолита.
+=======
+  title: EduPath — Управление курсами
+  description: API для создания курса и наполнения его уроками и материалами преподавателем
+>>>>>>> Stashed changes
 security:
   - BearerAuth: []
   - OAuth2: []
@@ -13,6 +18,7 @@ servers:
   - url: /api/v1
   - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
     variables:
+<<<<<<< Updated upstream
         Host:
           default: edupath.ru
           description: Host на котором развернут сервис
@@ -44,25 +50,58 @@ paths:
       description: Метод создает итоговый тест курса с вопросами и проходным баллом и возвращает его уникальный идентификатор. Вызывается frontend от имени преподавателя
       parameters:
         - $ref: "#/components/parameters/courseId"
+=======
+      Host:
+        default: host.ru
+        description: Host, на котором развернуто приложение
+      EnvironmentPrefix:
+        default: ''
+        description: Префикс тестового стенда
+      MicroserviceName:
+        default: edupath
+        description: Имя приложения в кластере
+tags:
+  - name: courses operations
+    description: Создание курса, уроков и материалов
+paths:
+  /courses:
+    post:
+      tags:
+        - courses operations
+      operationId: CreateCourse
+      summary: Создать курс
+      description: Метод создает курс в статусе черновика
+      parameters:
+        - $ref: '#/components/parameters/idempotencyKey'
+>>>>>>> Stashed changes
       requestBody:
         required: true
         content:
           application/json:
             schema:
+<<<<<<< Updated upstream
               $ref: '#/components/schemas/TestRq'
+=======
+              $ref: '#/components/schemas/CourseRq'
+>>>>>>> Stashed changes
       responses:
         201:
           description: Created
           content:
             application/json:
               schema:
+<<<<<<< Updated upstream
                 $ref: '#/components/schemas/TestRp'
+=======
+                $ref: '#/components/schemas/CourseRp'
+>>>>>>> Stashed changes
         400:
           description: Bad Request
         401:
           description: Unauthorized
         403:
           description: Forbidden
+<<<<<<< Updated upstream
         404:
           description: Not Found
         500:
@@ -82,12 +121,33 @@ paths:
       parameters:
         - $ref: "#/components/parameters/testId"
         - $ref: "#/components/parameters/idempotencyKey"
+=======
+        500:
+          description: Internal Service Error
+
+  /courses/{courseId}/materials:
+    post:
+      tags:
+        - courses operations
+      operationId: CreateMaterial
+      summary: Получить ссылку для загрузки материала
+      description: Метод регистрирует файл и возвращает временную ссылку для загрузки в хранилище
+      parameters:
+        - $ref: '#/components/parameters/courseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaterialRq'
+>>>>>>> Stashed changes
       responses:
         201:
           description: Created
           content:
             application/json:
               schema:
+<<<<<<< Updated upstream
                 $ref: '#/components/schemas/AttemptRp'
         400:
           description: Bad Request
@@ -116,6 +176,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttemptStateRp'
+=======
+                $ref: '#/components/schemas/MaterialRp'
+>>>>>>> Stashed changes
         400:
           description: Bad Request
         401:
@@ -127,6 +190,7 @@ paths:
         500:
           description: Internal Service Error
 
+<<<<<<< Updated upstream
   /attempts/{attemptId}/submit:
     post:
       tags:
@@ -139,11 +203,24 @@ paths:
         Вызывается frontend от имени студента
       parameters:
         - $ref: "#/components/parameters/attemptId"
+=======
+  /courses/{courseId}/lessons:
+    post:
+      tags:
+        - courses operations
+      operationId: CreateLesson
+      summary: Добавить урок
+      description: Метод добавляет урок в курс
+      parameters:
+        - $ref: '#/components/parameters/courseId'
+        - $ref: '#/components/parameters/idempotencyKey'
+>>>>>>> Stashed changes
       requestBody:
         required: true
         content:
           application/json:
             schema:
+<<<<<<< Updated upstream
               $ref: '#/components/schemas/AnswersRq'
       responses:
         200:
@@ -152,10 +229,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TestResultRp'
+=======
+              $ref: '#/components/schemas/LessonRq'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonRp'
+>>>>>>> Stashed changes
         400:
           description: Bad Request
         401:
           description: Unauthorized
+        403:
+          description: Forbidden
         404:
           description: Not Found
         409:
@@ -163,6 +252,7 @@ paths:
         500:
           description: Internal Service Error
 
+<<<<<<< Updated upstream
   /test-results:
     get:
       tags:
@@ -202,15 +292,34 @@ components:
           password:
             tokenUrl: https://auth.edupath.ru/auth/realms/edupath/protocol/openid-connect/token
             scopes: {}
+=======
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    OAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
+          scopes: {}
+>>>>>>> Stashed changes
   parameters:
     courseId:
       name: courseId
       in: path
+<<<<<<< Updated upstream
       description: Уникальный идентификатор курса
+=======
+      description: Идентификатор курса
+>>>>>>> Stashed changes
       required: true
       schema:
         type: string
         format: uuid
+<<<<<<< Updated upstream
     testId:
       name: testId
       in: path
@@ -524,3 +633,85 @@ components:
           description: Список результатов попыток
           items:
             $ref: '#/components/schemas/TestResultRp'
+=======
+    idempotencyKey:
+      name: Idempotency-Key
+      in: header
+      description: Ключ для защиты от повторной отправки
+      required: true
+      schema:
+        type: string
+  schemas:
+    CourseRq:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: Название курса
+        description:
+          type: string
+          description: Описание курса
+        category:
+          type: string
+          description: Категория
+    CourseRp:
+      type: object
+      properties:
+        courseId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          description: Статус курса (DRAFT - черновик)
+    MaterialRq:
+      type: object
+      required:
+        - fileName
+      properties:
+        fileName:
+          type: string
+          description: Имя файла
+        contentType:
+          type: string
+          description: Тип файла
+        size:
+          type: integer
+          description: Размер в байтах
+    MaterialRp:
+      type: object
+      properties:
+        materialId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type: string
+          description: Ссылка для загрузки
+    LessonRq:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: Название урока
+        orderNumber:
+          type: integer
+          description: Порядковый номер
+        content:
+          type: string
+          description: Текст урока
+        materialIds:
+          type: array
+          items:
+            type: string
+    LessonRp:
+      type: object
+      properties:
+        lessonId:
+          type: string
+          format: uuid
+        orderNumber:
+          type: integer
+>>>>>>> Stashed changes
