@@ -16,7 +16,7 @@ securityDefinitions:
     type: "apiKey"
     name: "Authorization"
     in: "header"
-    description: "JWT от IdP (Keycloak). Формат: Bearer <token>"
+    description: "JWT от IdP (Keycloak)"
 
 paths:
   /user:

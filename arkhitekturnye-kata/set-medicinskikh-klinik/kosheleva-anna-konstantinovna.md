@@ -319,7 +319,7 @@ aliases:
 
 ## 3\. 🤝 Swagger
 
-[swagger.json](./swagger.json) на всякий случай, так как ниже почему-то нет тела ответов в ответах.
+[swagger.json](./swagger.json) на всякий случай, так как ниже почему-то нет тела ответов в ответах. проверено через vcs openapi validate: соответствует спецификации swagger 2.0
 
 [openapi:./_index-2-2.yaml:true]
 
