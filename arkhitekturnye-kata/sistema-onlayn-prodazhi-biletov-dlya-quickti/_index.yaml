@@ -11,6 +11,8 @@ tags:
     description: Операции с бронированиями
     roomId:
           type: integer
+    userId:
+          type: integer
 paths:
   /bookings:
     post:
