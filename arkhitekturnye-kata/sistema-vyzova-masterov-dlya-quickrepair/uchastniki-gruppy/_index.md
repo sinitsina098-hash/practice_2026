@@ -117,7 +117,7 @@ order: 1
 
 :::
 
-[drawio:./uchastniki-gruppy.svg::211px:101px]
+[drawio:./_index.svg::211px:101px]
 
 ### Level 2 -- Containers
 
@@ -133,7 +133,7 @@ order: 1
 
 :::
 
-[mermaid:./uchastniki-gruppy.mermaid::497px:363px]
+[mermaid:./_index.mermaid::497px:363px]
 
 ## 🚩 4. Главный риск выбранного решения
 
