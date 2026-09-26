@@ -8,6 +8,7 @@ servers:
   - url: http://localhost:8081/api
 
 paths:
+
   /ratings:
     post:
       summary: Добавить оценку мастеру
@@ -20,6 +21,7 @@ paths:
               $ref: '#/components/schemas/RatingRequest'
 
       responses:
+
         '201':
           description: Оценка добавлена
           content:
@@ -28,13 +30,16 @@ paths:
                 $ref: '#/components/schemas/RatingResult'
 
         '400':
-          description: Неверные данные
+          description: Неверные данные запроса
 
         '404':
-          description: Заявка или мастер не найдены
+          description: Заявка, заказчик или мастер не найдены
 
         '409':
-          description: Заявка уже оценена
+          description: Заявка уже была оценена
+
+        '500':
+          description: Внутренняя ошибка сервера
 
 
   /masters/{masterId}/rating:
@@ -49,6 +54,7 @@ paths:
             type: integer
 
       responses:
+
         '200':
           description: Рейтинг мастера
           content:
@@ -58,6 +64,9 @@ paths:
 
         '404':
           description: Мастер не найден
+
+        '500':
+          description: Внутренняя ошибка сервера
 
 
   /masters/{masterId}/reviews:
@@ -72,6 +81,7 @@ paths:
             type: integer
 
       responses:
+
         '200':
           description: Список отзывов
           content:
@@ -83,6 +93,9 @@ paths:
 
         '404':
           description: Мастер не найден
+
+        '500':
+          description: Внутренняя ошибка сервера
 
 
   /masters/{masterId}/rating-profile:
@@ -97,6 +110,7 @@ paths:
             type: integer
 
       responses:
+
         '200':
           description: Рейтинг и отзывы мастера
           content:
@@ -107,6 +121,9 @@ paths:
         '404':
           description: Мастер не найден
 
+        '500':
+          description: Внутренняя ошибка сервера
+
 
 components:
 
@@ -114,6 +131,7 @@ components:
 
     RatingRequest:
       type: object
+
       required:
         - orderId
         - customerId
@@ -130,7 +148,7 @@ components:
         customerId:
           type: integer
           description: ID заказчика
-          example: 35
+          example: 40
 
         masterId:
           type: integer
@@ -152,6 +170,11 @@ components:
 
     RatingResult:
       type: object
+
+      required:
+        - ratingId
+        - result
+
       properties:
 
         ratingId:
@@ -166,6 +189,12 @@ components:
 
     MasterRating:
       type: object
+
+      required:
+        - masterId
+        - averageRating
+        - ratingsCount
+
       properties:
 
         masterId:
@@ -183,18 +212,27 @@ components:
 
     Review:
       type: object
+
+      required:
+        - ratingId
+        - customerId
+        - score
+        - createdAt
+
       properties:
 
         ratingId:
           type: integer
-          example: 70
+          example: 75
 
         customerId:
           type: integer
-          example: 45
+          example: 35
 
         score:
           type: integer
+          minimum: 1
+          maximum: 5
           example: 5
 
         comment:
@@ -209,11 +247,18 @@ components:
 
     MasterProfile:
       type: object
+
+      required:
+        - masterId
+        - averageRating
+        - ratingsCount
+        - reviews
+
       properties:
 
         masterId:
           type: integer
-          example: 120
+          example: 20
 
         averageRating:
           type: number
