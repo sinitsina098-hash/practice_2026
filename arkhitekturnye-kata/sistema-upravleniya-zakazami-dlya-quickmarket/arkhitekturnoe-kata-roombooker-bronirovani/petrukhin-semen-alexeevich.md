@@ -1,6 +1,10 @@
 ---
-order: 0.5
+order: 2.5
 title: Петрухин Семён Алексеевич
+aliases:
+  - path: >-
+      arkhitekturnye-kata/sistema-upravleniya-zakazami-dlya-quickmarket/petrukhin-semen-alexeevich
+    moved: "2026-09-26T05:11:10Z"
 ---
 
 ## 1\. 📖 Описание функциональных границ микросервиса
@@ -91,6 +95,6 @@ title: Петрухин Семён Алексеевич
 
 ## 3\. 🤝 Swagger
 
-[openapi:./_index-2.yaml:true]
+[openapi:./_index-2-2.yaml:true]
 
-###
+### 
