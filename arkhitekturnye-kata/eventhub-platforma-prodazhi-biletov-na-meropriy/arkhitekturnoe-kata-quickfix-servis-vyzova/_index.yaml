@@ -75,11 +75,6 @@ paths:
       - "application/json"
 
       parameters:
-      - name: "eventId"
-        in: "query"
-        required: true
-        type: "string"
-
       - in: "body"
         name: "body"
         required: true
@@ -116,11 +111,6 @@ paths:
       - "application/json"
 
       parameters:
-      - name: "saleId"
-        in: "query"
-        required: true
-        type: "string"
-
       - in: "body"
         name: "body"
         required: true
@@ -211,11 +201,15 @@ definitions:
   CreateSaleRequest:
     type: "object"
     required:
+    - "eventId"
     - "ticketId"
     - "price"
     - "purchasedAt"
 
     properties:
+      eventId:
+        type: "string"
+
       ticketId:
         type: "string"
 
@@ -228,6 +222,7 @@ definitions:
 
   Sale:
     type: "object"
+
     properties:
       saleId:
         type: "string"
@@ -236,15 +231,20 @@ definitions:
   CancellationRequest:
     type: "object"
     required:
+    - "saleId"
     - "cancelledAt"
 
     properties:
+      saleId:
+        type: "string"
+
       cancelledAt:
         type: "string"
 
 
   Cancellation:
     type: "object"
+
     properties:
       cancellationId:
         type: "string"
@@ -307,6 +307,7 @@ definitions:
 
   SalesPeriod:
     type: "object"
+
     properties:
       periodStart:
         type: "string"
@@ -320,6 +321,7 @@ definitions:
 
   RevenuePeriod:
     type: "object"
+
     properties:
       periodStart:
         type: "string"
@@ -333,6 +335,7 @@ definitions:
 
   ErrorResponse:
     type: "object"
+
     properties:
       code:
         type: "string"
