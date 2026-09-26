@@ -1,6 +1,8 @@
 ---
 order: 2
 title: "Ивашнева Полина Ивановна\_MS Cartography Service"
+order: 3
+title: "Ивашнева Полина Ивановна\_MS Parking Session (Микросервис управления парковочными сессиями)"
 ---
 
 ## 1\. 📖 Описание функциональных границ микросервиса
@@ -107,4 +109,4 @@ title: "Ивашнева Полина Ивановна\_MS Cartography Service"
 
 [openapi:./_index-2.yaml:true]
 
-### 
+###
