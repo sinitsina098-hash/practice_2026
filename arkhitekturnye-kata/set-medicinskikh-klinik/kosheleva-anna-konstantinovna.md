@@ -315,7 +315,7 @@ aliases:
 
 {% /table %}
 
-![](./kosheleva-anna-konstantinovna-3.webp){width=1123px height=1068px}
+![](./kosheleva-anna-konstantinovna-3.webp){width=1063px height=1467px}
 
 ## 3\. 🤝 Swagger
 
