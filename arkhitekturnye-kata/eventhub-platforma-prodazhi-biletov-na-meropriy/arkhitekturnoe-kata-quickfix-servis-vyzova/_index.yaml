@@ -1,198 +1,337 @@
-openapi: "3.0.1"
-info:
-  version:  1.0.0 | 01.04.2024
-  title: Наименование сервиса
-  description: Краткое описание api-интерфейса сервиса
-security:
-  - BearerAuth: []
-  - OAuth2: []
-servers:
-  - url: /api/v1
-  - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
-    variables:
-        Host:
-          default: host.ru
-          description: Host на котором развернут микросервис
-        EnvironmentPrefix:
-          default: ''
-          description: |
-            Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
-            Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
-        MicroserviceName:
-          default: microservice
-          description: |
-            Имя под которым микросервис развернут в кластере микросервисов
-            Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
-tags:
-    - name: resources operations
-      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с информацией по ресурсам стоит тэгировать как resources operations
-paths:
-  /resources:
-    get:
-      tags: 
-        - resources operations
-      operationId: GetResource
-      summary: Получить список ресурсов
-      description: Метод возвращает список ресурсов. При запросе можно отфильтровать список
-      parameters:
-        - in: query
-          name: resourceFilter
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceFilter"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ResourcesRp"
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+swagger: "2.0"
 
-    post:
-      tags: 
-        - resources operations
-      operationId: CreateResource
-      summary: Создать объект
-      description: Метод создает объект с его уникальным идентификатором
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourcesRp'
-      responses:
-        201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/parameters/resourceId'
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-  /resources/{resourceId}:  
-    delete:
-      tags: 
-        - resources operations
-      operationId: deleteResource
-      summary: Удалить объект по его идентификатору
-      description: Метод удаляет объект по его идентификатору
-      parameters:
-        - in: path
-          name: resourceId
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceId"
-      responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+info:
+  description: " Analytics Service"
+  version: "1.0.0"
+  title: "EventHub Analytics Service"
+
+host: "api.eventhub.example.com"
+basePath: "/v1"
+tags:
+- name: "events"
+  description: "Данные мероприятий для расчета статистики"
+- name: "sales"
+  description: "Регистрация продаж и отмен"
+- name: "statistics"
+  description: "Получение статистики продаж"
+
+schemes:
+- "https"
+
+paths:
+
+  /events/{eventId}/capacity:
     put:
-      tags: 
-        - resources operations
-      operationId: UpdateResource
-      summary: Обновить объект
-      description: Метод обновляет объект по его идентификатору по атрибутам переданным в запросе
+      tags:
+      - "events"
+      operationId: "updateEventCapacity"
+
+      consumes:
+      - "application/json"
+
+      produces:
+      - "application/json"
+
       parameters:
-        - in: path
-          name: resourceId
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceId"
-      requestBody:
+      - name: "eventId"
+        in: "path"
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourceRq'
-              
+        type: "string"
+
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CapacityRequest"
+
       responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-components:
-  securitySchemes:
-      BearerAuth:
-          type: http
-          scheme: bearer
-          bearerFormat: JWT
-      OAuth2:
-         type: oauth2
-         flows:
-          password:
-            tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
-            scopes: {}
-  parameters:  
-    resourceId:
-      name: resourceId
-      in: path
-      description: Уникальный идентификатор
-      required: true
-      schema:
-        type: string
-        format: uuid
-    resourceFilter:
-      name: resourceFilter
-      in: query
-      description: Фильтр параметр
-      required: true
-      schema:
-        $ref: '#/components/schemas/resourceFilter'
-  schemas:
-    resourceFilter:
-      description: Фильтр параметр ресурса
-      type: string
-    ResourcesRp: 
-        description: Список объектов ресурс
-        type: array
-        items:
-          $ref: '#/components/schemas/Resource'
-    Resource:
-      type: object
-      description: Объект ресурс
-      required: 
-        - resourceId
-      properties:
-        Att1:
-         type: string
-         description: Простой атрибут типа строка
-        Att2:
-         type: integer
-         description: Простой атрибут типа число
-        Att3:
-         type: boolean
-         description: Простой атрибут булевого типа
-    ResourceRq:
-      $ref: '#/components/schemas/Resource'
+        "200":
+          description: "Количество билетов успешно сохранено"
+
+        "400":
+          description: "Некорректное количество билетов"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+        "500":
+          description: "Внутренняя ошибка сервиса"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
+  /sales:
+    post:
+      tags:
+      - "sales"
+      operationId: "registerSale"
+
+      consumes:
+      - "application/json"
+
+      produces:
+      - "application/json"
+
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateSaleRequest"
+
+      responses:
+        "200":
+          description: "Продажа успешно зарегистрирована"
+          schema:
+            $ref: "#/definitions/Sale"
+
+        "400":
+          description: "Некорректные данные продажи"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+        "500":
+          description: "Внутренняя ошибка сервиса"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
+  /sales/{saleId}/cancellations:
+    post:
+      tags:
+      - "sales"
+      operationId: "registerSaleCancellation"
+
+      consumes:
+      - "application/json"
+
+      produces:
+      - "application/json"
+
+      parameters:
+      - name: "saleId"
+        in: "path"
+        required: true
+        type: "string"
+
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CancellationRequest"
+
+      responses:
+        "200":
+          description: "Отмена успешно зарегистрирована"
+          schema:
+            $ref: "#/definitions/Cancellation"
+
+        "400":
+          description: "Некорректные данные отмены"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+        "404":
+          description: "Продажа с указанным saleId не найдена"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+        "500":
+          description: "Внутренняя ошибка сервиса"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
+  /events/{eventId}/statistics:
+    get:
+      tags:
+      - "statistics"
+      operationId: "getEventStatistics"
+
+      produces:
+      - "application/json"
+
+      parameters:
+      - name: "eventId"
+        in: "path"
+        required: true
+        type: "string"
+
+      - name: "from"
+        in: "query"
+        required: false
+        type: "string"
+
+      - name: "to"
+        in: "query"
+        required: false
+        type: "string"
+
+      responses:
+        "200":
+          description: "Статистика мероприятия успешно получена"
+          schema:
+            $ref: "#/definitions/EventStatistics"
+
+        "400":
+          description: "Некорректно указан период статистики"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+        "404":
+          description: "Мероприятие с указанным eventId не найдено"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+        "500":
+          description: "Внутренняя ошибка сервиса"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+
+definitions:
+
+  CapacityRequest:
+    type: "object"
+    required:
+    - "eventId"
+    - "totalTickets"
+    properties:
+      eventId:
+        type: "string"
+        
+      totalTickets:
+        type: "integer"
+
+  CreateSaleRequest:
+    type: "object"
+    required:
+    - "eventId"
+    - "ticketId"
+    - "price"
+    - "purchasedAt"
+
+    properties:
+      eventId:
+        type: "string"
+
+      ticketId:
+        type: "string"
+
+      price:
+        type: "number"
+
+      purchasedAt:
+        type: "string"
+
+  Sale:
+    type: "object"
+    properties:
+      saleId:
+        type: "string"
+
+  CancellationRequest:
+    type: "object"
+    required:
+    - "cancelledAt"
+
+    properties:
+      cancelledAt:
+        type: "string"
+
+
+  Cancellation:
+    type: "object"
+    properties:
+      cancellationId:
+        type: "string"
+
+
+  EventStatistics:
+    type: "object"
+    required:
+    - "totalTickets"
+    - "soldTickets"
+    - "availableTickets"
+    - "cancelledSales"
+    - "totalRevenue"
+    - "salesPerHour"
+    - "salesPerDay"
+    - "revenuePerHour"
+    - "revenuePerDay"
+    - "updatedAt"
+
+    properties:
     
-   
+      totalTickets:
+        type: "integer"
+
+      soldTickets:
+        type: "integer"
+
+      availableTickets:
+        type: "integer"
+
+      cancelledSales:
+        type: "integer"
+
+      totalRevenue:
+        type: "number"
+
+      salesPerHour:
+        type: "array"
+        items:
+          $ref: "#/definitions/SalesPeriod"
+
+      salesPerDay:
+        type: "array"
+        items:
+          $ref: "#/definitions/SalesPeriod"
+
+      revenuePerHour:
+        type: "array"
+        items:
+          $ref: "#/definitions/RevenuePeriod"
+
+      revenuePerDay:
+        type: "array"
+        items:
+          $ref: "#/definitions/RevenuePeriod"
+          
+      updatedAt:
+        type: "string"
+
+
+  SalesPeriod:
+    type: "object"
+    properties:
+      periodStart:
+        type: "string"
+        
+      periodEnd:
+        type: "string"
+
+      soldTickets:
+        type: "integer"
+
+
+  RevenuePeriod:
+    type: "object"
+    properties:
+      periodStart:
+        type: "string"
+        
+      periodEnd:
+        type: "string"
+
+      revenue:
+        type: "number"
+
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      code:
+        type: "string"
+
+      message:
+        type: "string"
