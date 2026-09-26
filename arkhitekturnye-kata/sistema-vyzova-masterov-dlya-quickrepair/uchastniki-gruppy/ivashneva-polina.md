@@ -4,8 +4,10 @@ title: "Ивашнева Полина Ивановна\_MS Parking Session (Ми
 ---
 
 ---
+
 order: 2
-title: "Ивашнева Полина Ивановна\_MS Cartography Service"
+title: "Ивашнева Полина Ивановна_MS Cartography Service"
+
 ---
 
 ## 1\. 📖 Описание функциональных границ микросервиса
@@ -66,7 +68,7 @@ title: "Ивашнева Полина Ивановна\_MS Cartography Service"
 
 *  {% colwidth=[156] %}
 
-   
+   Mobile App (водитель)
 
 *  {% colwidth=[156] %}
 
@@ -88,7 +90,139 @@ title: "Ивашнева Полина Ивановна\_MS Cartography Service"
 
 *  {% colwidth=[156] %}
 
+   Mobile App (водитель)
+
+*  {% colwidth=[156] %}
+
    
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[192] %}
+
+   
+
+*  {% colwidth=[239] %}
+
+   
+
+---
+
+*  {% colwidth=[156] %}
+
+   Mobile App (водитель)
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[192] %}
+
+   
+
+*  {% colwidth=[239] %}
+
+   
+
+---
+
+*  {% colwidth=[156] %}
+
+   Admin Panel (Администратор)
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[192] %}
+
+   
+
+*  {% colwidth=[239] %}
+
+   
+
+---
+
+*  {% colwidth=[156] %}
+
+   Admin Panel (Администратор)
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[192] %}
+
+   
+
+*  {% colwidth=[239] %}
+
+   
+
+---
+
+*  {% colwidth=[156] %}
+
+   Admin Panel (Администратор)
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[192] %}
+
+   
+
+*  {% colwidth=[239] %}
+
+   
+
+---
+
+*  {% colwidth=[156] %}
+
+   MS Parking Session
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[156] %}
+
+   
+
+*  {% colwidth=[192] %}
+
+   
+
+*  {% colwidth=[239] %}
+
+   
+
+---
+
+*  {% colwidth=[156] %}
+
+   MS Legacy Integration
 
 *  {% colwidth=[156] %}
 
