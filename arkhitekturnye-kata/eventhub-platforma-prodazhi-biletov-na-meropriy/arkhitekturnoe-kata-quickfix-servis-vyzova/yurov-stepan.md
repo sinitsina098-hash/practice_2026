@@ -1,6 +1,10 @@
 ---
-order: 2
+order: 0.5
 title: Юров Степан
+aliases:
+  - path: >-
+      arkhitekturnye-kata/eventhub-platforma-prodazhi-biletov-na-meropriy/yurov-stepan
+    moved: "2026-09-26T04:41:31Z"
 ---
 
 ## 1\. 📖 Описание функциональных границ микросервиса
