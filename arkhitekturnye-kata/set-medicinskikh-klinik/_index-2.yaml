@@ -1,8 +1,8 @@
 openapi: "3.0.1"
 info:
-  version:  1.0.0 | 26.09.2026
-  title: PetService
-  description: "Pet Service  - модуль профилей питомцев платформы PetCare. Отвечает за создание, редактирование, просмотр и удаление профилей животных: имя, вид, порода, дата рождения и фото питомца."
+  version: 1.0.0 | 01.04.2026
+  title: Сервис уведомлений PetCare
+  description: API микросервиса для создания, переноса, изменения, отмены напоминаний о визите к ветеринару и получения их статуса
 security:
   - BearerAuth: []
   - OAuth2: []
@@ -10,289 +10,294 @@ servers:
   - url: /api/v1
   - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
     variables:
-        Host:
-          default: host.ru
-          description: Host на котором развернут микросервис
-        EnvironmentPrefix:
-          default: ''
-          description: |
-            Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
-            Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
-        MicroserviceName:
-          default: microservice
-          description: |
-            Имя под которым микросервис развернут в кластере микросервисов
-            Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
+      Host:
+        default: host.ru
+        description: Host, на котором развернут микросервис
+      EnvironmentPrefix:
+        default: ''
+        description: Префикс тестового стенда (feature environment)
+      MicroserviceName:
+        default: notification-service
+        description: Имя, под которым микросервис развернут в кластере
 tags:
-    - name: pet operations
-      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с информацией по ресурсам стоит тэгировать как resources operations
-paths:
-  /pets:
-    get:
-      tags: 
-        - pet operations
-      operationId: GetPets
-      summary: Получить питомцев владельца
-      description: Метод возвращает список профилей питомцев по идентификатору владельца
-      parameters:
-        - in: query
-          name: ownerId
-          required: true
-          schema:
-            $ref: "#/components/parameters/ownerId"
-      responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+  - name: Reminders
+    description: Операции с напоминаниями о визите
 
-    post:
-      tags: 
-        - pet operations
-      operationId: CreatePet
-      summary: Создать профиль питомца
-      description: Метод проверяет владельца и создаёт новый профиль питомца
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PetRequest'
-      responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-  /pets/{petId}:  
-    get:
-      tags: 
-        - pet operations
-      operationId: GetPetById
-      summary: Найти питомца по идентификатору
-      description: Метод возвращает профиль одного питомца
-      parameters:
-        - in: path
-          name: petId
-          required: true
-          schema:
-            $ref: "#/components/parameters/petId"
-      responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-    delete:
-      tags: 
-        - pet operations
-      operationId: DeletePet
-      summary: Удалить профиль питомца
-      description: Метод удаляет профиль питомца по его идентификатору
-      parameters:
-        - in: path
-          name: petId
-          required: true
-          schema:
-            $ref: "#/components/parameters/petId"
-      responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-    put:
-      tags: 
-        - pet operations
-      operationId: UpdatePet
-      summary: Обновить профиль питомца
-      description: Метод обновляет профиль питомца по атрибутам, переданным в запросе
-      parameters:
-        - in: path
-          name: petId
-          required: true
-          schema:
-            $ref: "#/components/parameters/petId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PetRequest'
-              
-      responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-  /pets/{petId}/photo:
+paths:
+  /reminders:
     post:
       tags:
-        - pet operations
-      operationId: UploadPetPhoto
-      summary: Добавить фото питомца
-      description: Метод загружает фото питомца и сохраняет его в профиле
-      parameters:
-        - in: path
-          name: petId
-          required: true
-          schema:
-            $ref: "#/components/parameters/petId"
+        - Reminders
+      operationId: createReminder
+      summary: Создать напоминание о визите
+      description: Метод проверяет данные, рассчитывает время отправки и сохраняет напоминание
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                  description: Файл фотографии питомца
+              $ref: '#/components/schemas/CreateReminderRq'
       responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderRp'
+        '400':
           description: Bad Request
-        401:
+        '401':
           description: Unauthorized
-        404:
+        '500':
+          description: Internal Server Error
+
+  /reminders/{reminderId}:
+    get:
+      tags:
+        - Reminders
+      operationId: getReminder
+      summary: Получить статус напоминания
+      description: Метод находит напоминание и возвращает его текущее состояние
+      parameters:
+        - $ref: '#/components/parameters/reminderId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderStatusRp'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
           description: Not Found
-        500:
-          description: Internal Service Error
+        '500':
+          description: Internal Server Error
+
+    patch:
+      tags:
+        - Reminders
+      operationId: updateReminderTargetAction
+      summary: Изменить напоминание при изменении записи
+      description: Метод находит напоминание и изменяет целевое действие в его тексте
+      parameters:
+        - $ref: '#/components/parameters/reminderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTargetActionRq'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderTextRp'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+  /reminders/{reminderId}/reschedule:
+    post:
+      tags:
+        - Reminders
+      operationId: rescheduleReminder
+      summary: Перенести напоминание при переносе записи
+      description: Метод находит напоминание и пересчитывает время отправки по новой дате визита
+      parameters:
+        - $ref: '#/components/parameters/reminderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RescheduleReminderRq'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RescheduleReminderRp'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+  /reminders/{reminderId}/cancel:
+    post:
+      tags:
+        - Reminders
+      operationId: cancelReminder
+      summary: Отменить напоминание при отмене записи
+      description: Метод находит напоминание и переводит его в статус «отменено»
+      parameters:
+        - $ref: '#/components/parameters/reminderId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderStatusRp'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
 components:
   securitySchemes:
-      BearerAuth:
-          type: http
-          scheme: bearer
-          bearerFormat: JWT
-      OAuth2:
-         type: oauth2
-         flows:
-          password:
-            tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
-            scopes: {}
-  parameters:  
-    petId:
-      name: petId
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    OAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
+          scopes: {}
+
+  parameters:
+    reminderId:
+      name: reminderId
       in: path
-      description: Уникальный идентификатор питомца
+      description: Идентификатор напоминания
       required: true
       schema:
         type: string
         format: uuid
-    ownerId:
-      name: ownerId
-      in: query
-      description: Уникальный идентификатор владельца
-      required: true
-      schema:
-        type: string
-        format: uuid
+
   schemas:
-    PetsRp: 
-        description: Список профилей питомцев
-        type: array
-        items:
-          $ref: '#/components/schemas/Pet'
-    PetRequest:
+    ReminderStatus:
+      type: string
+      description: |
+        Статус напоминания:
+        * SCHEDULED - запланировано
+        * SENT - отправлено
+        * CANCELLED - отменено
+        * ERROR - ошибка отправки
+      enum:
+        - SCHEDULED
+        - SENT
+        - CANCELLED
+        - ERROR
+      example: SCHEDULED
+
+    CreateReminderRq:
       type: object
-      description: Данные питомца, передаваемые при создании или обновлении профиля
-      required: 
-        - ownerId
-        - name
-        - species
+      description: Данные для создания напоминания
+      required:
+        - appointmentId
+        - ownerContact
+        - visitDateTime
+        - clinic
+        - doctor
       properties:
-        ownerId:
-         type: string
-         format: uuid
-         description: Идентификатор владельца
-        name:
-         type: string
-         description: Кличка питомца
-         example: "Балбес"
-        species:
-         type: string
-         description: Вид животного
-         enum:
-          - "собака"
-          - "кошка"
-          - "попугай"
-          - "кролик"
-          - "другое"
-        breed:
-         type: string
-         description: Порода питомца
-         example: "бульдог"
-        birthDate:
-         type: string
-         format: date
-         description: Дата рождения питомца
-    Pet:
+        appointmentId:
+          type: string
+          format: uuid
+          description: Идентификатор записи
+        ownerContact:
+          type: string
+          description: Контакт владельца
+          example: "+79991234567"
+        visitDateTime:
+          type: string
+          format: date-time
+          description: Дата и время визита
+          example: "2026-10-01T10:30:00Z"
+        clinic:
+          type: string
+          description: Клиника
+          example: Ветклиника «Лапа»
+        doctor:
+          type: string
+          description: Врач
+          example: Иванова А.А.
+        targetAction:
+          type: string
+          description: Целевое действие, которое указывается в тексте напоминания
+          example: Взять ветеринарный паспорт
+
+    RescheduleReminderRq:
       type: object
-      description: Профиль питомца
-      required: 
-        - petId
+      description: Новые дата и время визита
+      required:
+        - visitDateTime
       properties:
-        petId:
-         type: string
-         format: uuid
-         description: Уникальный идентификатор питомца
-        ownerId:
-         type: string
-         format: uuid
-         description: Идентификатор владельца
-        name:
-         type: string
-         description: Кличка питомца
-        species:
-         type: string
-         description: Вид животного
-        breed:
-         type: string
-         description: Порода питомца
-        birthDate:
-         type: string
-         format: date
-         description: Дата рождения питомца
-        photoUrl:
-         type: string
-         description: Ссылка на фото питомца во внешнем хранилище
+        visitDateTime:
+          type: string
+          format: date-time
+          description: Новые дата и время визита
+          example: "2026-10-03T15:00:00Z"
+
+    UpdateTargetActionRq:
+      type: object
+      description: Новое целевое действие
+      required:
+        - targetAction
+      properties:
+        targetAction:
+          type: string
+          description: Новое целевое действие
+          example: Прийти на прививку
+
+    ReminderRp:
+      type: object
+      description: Напоминание
+      properties:
+        reminderId:
+          type: string
+          format: uuid
+          description: Идентификатор напоминания
+        sendAt:
+          type: string
+          format: date-time
+          description: Время отправки
+          example: "2026-09-30T10:30:00Z"
+        status:
+          $ref: '#/components/schemas/ReminderStatus'
+
+    RescheduleReminderRp:
+      type: object
+      description: Новое время отправки напоминания
+      properties:
+        sendAt:
+          type: string
+          format: date-time
+          description: Новое время отправки
+          example: "2026-10-02T15:00:00Z"
+
+    ReminderTextRp:
+      type: object
+      description: Обновлённый текст напоминания
+      properties:
+        text:
+          type: string
+          description: Новый текст напоминания
+          example: "Напоминаем о визите 03.10 в 15:00 в ветклинику «Лапа» к врачу Ивановой А.А. Прийти за 10 минут до приёма"
+
+    ReminderStatusRp:
+      type: object
+      description: Статус напоминания
+      properties:
+        status:
+          $ref: '#/components/schemas/ReminderStatus'
