@@ -123,7 +123,7 @@ aliases:
 
 *  {% colwidth=[192] %}
 
-   id
+   id (== sub из IdP)
 
    ```
    {
@@ -171,7 +171,7 @@ aliases:
 
 *  {% colwidth=[192] %}
 
-   id
+   id (== sub из IdP)
 
 *  {% colwidth=[329] %}
 
@@ -212,7 +212,7 @@ aliases:
 
 *  {% colwidth=[192] %}
 
-   id
+   id (== sub из IdP)
 
 *  {% colwidth=[329] %}
 
