@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "description": "This is a sample server Petstore server.",
+    "description": "микросервис clients-srv",
     "version": "1.0.0",
-    "title": "Swagger Petstore"
+    "title": "clients-srv API"
   },
-  "host": "petstore.swagger.io",
-  "basePath": "/v2",
+  "host": "clients-srv.local",
+  "basePath": "/api/v1",
   "tags": [
     {
       "name": "user",
@@ -17,6 +17,14 @@
     "https",
     "http"
   ],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "JWT от IdP (Keycloak). Формат: Bearer <token>"
+    }
+  },
   "paths": {
     "/user": {
       "post": {
@@ -24,9 +32,17 @@
           "user"
         ],
         "summary": "Создать пользователя",
-        "description": "Создаёт профиль после регистрации в IdP. Вызывается до получения токена.",
+        "description": "Создаёт профиль клиента после регистрации в IdP. id == sub из JWT.",
         "produces": [
           "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "security": [
+          {
+            "Bearer": []
+          }
         ],
         "parameters": [
           {
@@ -49,6 +65,12 @@
           "400": {
             "description": "Неверные данные"
           },
+          "401": {
+            "description": "Токен отсутствует или недействителен"
+          },
+          "403": {
+            "description": "Недостаточно прав"
+          },
           "409": {
             "description": "Данный email или userName уже используется"
           }
@@ -64,13 +86,12 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [
+        "security": [
           {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "type": "string"
-          },
+            "Bearer": []
+          }
+        ],
+        "parameters": [
           {
             "name": "id",
             "in": "path",
@@ -86,8 +107,14 @@
               "$ref": "#/definitions/User_out"
             }
           },
+          "400": {
+            "description": "Некорректный id"
+          },
           "401": {
             "description": "Токен отсутствует или недействителен"
+          },
+          "403": {
+            "description": "Недостаточно прав"
           },
           "404": {
             "description": "Пользователь не найден"
@@ -102,13 +129,15 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [
+        "consumes": [
+          "application/json"
+        ],
+        "security": [
           {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "type": "string"
-          },
+            "Bearer": []
+          }
+        ],
+        "parameters": [
           {
             "in": "path",
             "name": "id",
@@ -138,6 +167,9 @@
           "401": {
             "description": "Токен отсутствует или недействителен"
           },
+          "403": {
+            "description": "Недостаточно прав"
+          },
           "404": {
             "description": "Пользователь не найден"
           },
@@ -154,13 +186,12 @@
         "produces": [
           "application/json"
         ],
-        "parameters": [
+        "security": [
           {
-            "name": "Authorization",
-            "in": "header",
-            "required": true,
-            "type": "string"
-          },
+            "Bearer": []
+          }
+        ],
+        "parameters": [
           {
             "name": "id",
             "in": "path",
@@ -176,8 +207,14 @@
               "$ref": "#/definitions/User_out"
             }
           },
+          "400": {
+            "description": "Некорректный id"
+          },
           "401": {
             "description": "Токен отсутствует или недействителен"
+          },
+          "403": {
+            "description": "Недостаточно прав"
           },
           "404": {
             "description": "Пользователя с таким id не существует"
@@ -201,6 +238,7 @@
         "id": {
           "type": "string",
           "format": "uuid",
+          "description": "sub из IdP",
           "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
         },
         "userName": {
@@ -234,6 +272,7 @@
         "id": {
           "type": "string",
           "format": "uuid",
+          "description": "sub из IdP",
           "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
         },
         "userName": {
@@ -293,7 +332,7 @@
         "deletedAt": {
           "type": "string",
           "format": "date-time",
-          "x-nullable": true,
+          "description": "если null, то запись активна",
           "example": null
         }
       }
@@ -301,6 +340,7 @@
     "User_patch": {
       "type": "object",
       "additionalProperties": false,
+      "minProperties": 1,
       "properties": {
         "userName": {
           "type": "string",

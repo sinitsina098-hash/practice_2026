@@ -1,16 +1,22 @@
 swagger: "2.0"
 info:
-  description: "This is a sample server Petstore server."
+  description: "микросервис clients-srv"
   version: "1.0.0"
-  title: "Swagger Petstore"
-host: "petstore.swagger.io"
-basePath: "/v2"
+  title: "clients-srv API"
+host: "clients-srv.local"
+basePath: "/api/v1"
 tags:
 - name: "user"
   description: "операции с пользователем"
 schemes:
 - "https"
 - "http"
+securityDefinitions:
+  Bearer:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    description: "JWT от IdP (Keycloak). Формат: Bearer <token>"
 
 paths:
   /user:
@@ -18,9 +24,13 @@ paths:
       tags:
       - "user"
       summary: "Создать пользователя"
-      description: "Создаёт профиль после регистрации в IdP. Вызывается до получения токена."
+      description: "Создаёт профиль клиента после регистрации в IdP. id == sub из JWT."
       produces:
       - "application/json"
+      consumes:
+      - "application/json"
+      security:
+      - Bearer: []
       parameters:
       - in: "body"
         name: "body"
@@ -35,6 +45,10 @@ paths:
             $ref: "#/definitions/User_out"
         "400":
           description: "Неверные данные"
+        "401":
+          description: "Токен отсутствует или недействителен"
+        "403":
+          description: "Недостаточно прав"
         "409":
           description: "Данный email или userName уже используется"
 
@@ -45,11 +59,9 @@ paths:
       summary: "Получить пользователя по id"
       produces:
       - "application/json"
+      security:
+      - Bearer: []
       parameters:
-      - name: "Authorization"
-        in: "header"
-        required: true
-        type: "string"
       - name: "id"
         in: "path"
         required: true
@@ -60,8 +72,12 @@ paths:
           description: "Успешный ответ"
           schema:
             $ref: "#/definitions/User_out"
+        "400":
+          description: "Некорректный id"
         "401":
           description: "Токен отсутствует или недействителен"
+        "403":
+          description: "Недостаточно прав"
         "404":
           description: "Пользователь не найден"
     patch:
@@ -70,11 +86,11 @@ paths:
       summary: "Обновить пользователя"
       produces:
       - "application/json"
+      consumes:
+      - "application/json"
+      security:
+      - Bearer: []
       parameters:
-      - name: "Authorization"
-        in: "header"
-        required: true
-        type: "string"
       - in: "path"
         name: "id"
         required: true
@@ -94,6 +110,8 @@ paths:
           description: "Неверные данные"
         "401":
           description: "Токен отсутствует или недействителен"
+        "403":
+          description: "Недостаточно прав"
         "404":
           description: "Пользователь не найден"
         "409":
@@ -104,11 +122,9 @@ paths:
       summary: "Удалить клиента"
       produces:
       - "application/json"
+      security:
+      - Bearer: []
       parameters:
-      - name: "Authorization"
-        in: "header"
-        required: true
-        type: "string"
       - name: "id"
         in: "path"
         required: true
@@ -119,8 +135,12 @@ paths:
           description: "Успешный ответ"
           schema:
             $ref: "#/definitions/User_out"
+        "400":
+          description: "Некорректный id"
         "401":
           description: "Токен отсутствует или недействителен"
+        "403":
+          description: "Недостаточно прав"
         "404":
           description: "Пользователя с таким id не существует"
 
@@ -138,6 +158,7 @@ definitions:
       id:
         type: "string"
         format: "uuid"
+        description: "sub из IdP"
         example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
       userName:
         type: "string"
@@ -165,6 +186,7 @@ definitions:
       id:
         type: "string"
         format: "uuid"
+        description: "sub из IdP"
         example: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
       userName:
         type: "string"
@@ -209,12 +231,13 @@ definitions:
       deletedAt:
         type: "string"
         format: "date-time"
-        x-nullable: true
+        description: "если null, то запись активна"
         example: null
       
   User_patch:
     type: "object"
     additionalProperties: false
+    minProperties: 1
     properties:
       userName:
         type: "string"
