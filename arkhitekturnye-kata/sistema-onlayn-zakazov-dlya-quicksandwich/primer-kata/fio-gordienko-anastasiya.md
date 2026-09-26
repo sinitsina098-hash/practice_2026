@@ -1,13 +1,16 @@
 ---
 order: 1
+<<<<<<< Updated upstream
 title: "ФИО Гордиенко Анастасия пример "
+=======
+>>>>>>> Stashed changes
 ---
 
 ## 1\. 📖 Описание функциональных границ микросервиса
 
 ### 1\.1 Диаграмма компонентов архитектуры
 
-[mermaid:./fio-proektirovanie-api-2.mermaid::372px:278px]
+[mermaid:./fio-proektirovanie-api.mermaid::372px:278px]
 
 ### 1\.2 Описание микросервиса
 
@@ -101,6 +104,6 @@ title: "ФИО Гордиенко Анастасия пример "
 
 ## 3\. 🤝 Swagger
 
-[openapi:./fio-proektirovanie-api-2.yaml:true]
+[openapi:./fio-proektirovanie-api.yaml:true]
 
 ### 
