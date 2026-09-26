@@ -45,8 +45,6 @@ paths:
                     type: string
                   customerId:
                     type: integer
-                  masterId:
-                    type: integer
                   category:
                     type: string
                   description:
