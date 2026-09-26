@@ -2,224 +2,53 @@ openapi: "3.0.1"
 info:
   version: 1.0.0
   title: Ticket Service API
-  description: API микросервиса для управления бронированием, покупкой и возвратом билетов.
-security:
-  - BearerAuth: []
-  - OAuth2: []
+  description: Полностью линейный API без ссылок
 servers:
-  - url: /api/v1
-  - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
-    variables:
-      Host:
-        default: host.ru
-        description: Host на котором развернут микросервис
-      EnvironmentPrefix:
-        default: ''
-        description: Префикс конкретного тестового стенда (feature environment).
-      MicroserviceName:
-        default: ticketservice
-        description: Имя под которым микросервис развернут в кластере
+  - url: http://localhost:8080/api/v1
 tags:
-  - name: booking operations
-    description: Методы для управления процессом бронирования и покупки билетов
+  - name: bookings
+
 paths:
   /bookings:
     get:
-      tags: 
-        - booking operations
-      operationId: GetBookings
-      summary: Получить список бронирований
-      description: Метод возвращает список бронирований пользователя. Можно отфильтровать по статусу.
+      tags: [bookings]
+      summary: Получить список броней
       parameters:
         - in: query
-          name: statusFilter
-          required: false
-          schema:
-            $ref: "#/components/parameters/statusFilter"
+          name: status
+          schema: { type: string, enum: [BOOKED, PAID, CANCELLED] }
       responses:
         '200':
-          description: OK
+          description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BookingsRp"
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal Service Error
-
+                type: array
+                items:
+                  type: object
+                  properties:
+                    bookingId: { type: string }
+                    status: { type: string }
+    
     post:
-      tags: 
-        - booking operations
-      operationId: CreateBooking
-      summary: Создать бронь билетов
-      description: Метод блокирует выбранные места за пользователем и возвращает ID брони с тайм-аутом на оплату.
+      tags: [bookings]
+      summary: Создать новую бронь
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BookingRq'
+              type: object
+              properties:
+                eventId: { type: string }
+                seatIds: { type: array, items: { type: string } }
       responses:
         '201':
-          description: Created
+          description: Бронь создана
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-        '400':
-          description: Bad Request (например, места уже заняты)
-        '401':
-          description: Unauthorized
-        '500':
-          description: Internal Service Error
-
-  /bookings/{bookingId}:  
-    delete:
-      tags: 
-        - booking operations
-      operationId: CancelBooking
-      summary: Отменить бронь по идентификатору
-      description: Снятие блокировки с мест (отмена бронирования до оплаты).
-      parameters:
-        - in: path
-          name: bookingId
-          required: true
-          schema:
-            $ref: "#/components/parameters/bookingId"
-      responses:
-        '200':
-          description: OK (Успешная отмена)
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Service Error
-          
-    put:
-      tags: 
-        - booking operations
-      operationId: UpdateBookingStatus
-      summary: Обновить статус бронирования (оплатить)
-      description: Перевод забронированных билетов в статус "куплено" после успешной оплаты.
-      parameters:
-        - in: path
-          name: bookingId
-          required: true
-          schema:
-            $ref: "#/components/parameters/bookingId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BookingUpdateRq'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad Request
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
-        '500':
-          description: Internal Service Error
-
-components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-    OAuth2:
-      type: oauth2
-      flows:
-        password:
-          tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
-          scopes: {}
-  parameters:  
-    bookingId:
-      name: bookingId
-      in: path
-      description: Уникальный идентификатор брони
-      required: true
-      schema:
-        type: string
-        format: uuid
-    statusFilter:
-      name: statusFilter
-      in: query
-      description: Фильтр по статусу брони (BOOKED, PAID, CANCELLED)
-      required: false
-      schema:
-        type: string
-  schemas:
-    BookingsRp: 
-      description: Список объектов бронирования
-      type: array
-      items:
-        $ref: '#/components/schemas/Booking'
-        
-    Booking:
-      type: object
-      description: Объект бронирования
-      required: 
-        - bookingId
-        - eventId
-        - status
-      properties:
-        bookingId:
-          type: string
-          format: uuid
-          description: Уникальный ID брони
-        eventId:
-          type: string
-          description: ID мероприятия
-        seatIds:
-          type: array
-          items:
-            type: string
-          description: Массив идентификаторов забронированных мест
-        status:
-          type: string
-          enum: [BOOKED, PAID, CANCELLED]
-          description: Текущий статус билетов
-        expiresAt:
-          type: string
-          format: date-time
-          description: Время истечения тайм-аута брони (если не будет оплачено)
-          
-    BookingRq:
-      type: object
-      description: Тело запроса на создание брони
-      required:
-        - eventId
-        - seatIds
-      properties:
-        eventId:
-          type: string
-          description: ID мероприятия из каталога
-        seatIds:
-          type: array
-          items:
-            type: string
-          description: Массив выбранных мест
-          
-    BookingUpdateRq:
-      type: object
-      description: Запрос на изменение статуса (например, после оплаты)
-      required:
-        - status
-      properties:
-        status:
-          type: string
-          enum: [PAID, CANCELLED]
-        transactionId:
-          type: string
-          description: ID банковской транзакции (опционально, при подтверждении оплаты)
+                type: object
+                properties:
+                  bookingId: { type: string }
+                  status: { type: string }
