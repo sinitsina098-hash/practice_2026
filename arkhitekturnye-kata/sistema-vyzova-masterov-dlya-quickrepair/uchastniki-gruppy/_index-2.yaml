@@ -184,10 +184,10 @@ components:
       required: 
         - resourceId
       properties:
-        Att1:
+        login:
          type: string
          description: Логин
-        Att2:
+        password:
          type: string
          description: Пароль
 
