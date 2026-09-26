@@ -5,9 +5,14 @@ info:
 servers:
   - url: https://api.quickfix.ru/availability/v1
 
+tags:
+  - name: masters
+
 paths:
   /masters/{masterId}/schedule:
     get:
+      tags:
+        - masters
       summary: Получить расписание мастера
       parameters:
         - name: masterId
@@ -26,6 +31,8 @@ paths:
           description: Мастер не найден
 
     put:
+      tags:
+        - masters
       summary: Обновить расписание мастера
       parameters:
         - name: masterId
@@ -46,6 +53,8 @@ paths:
 
   /masters/{masterId}/schedule/exceptions:
     post:
+      tags:
+        - masters
       summary: Добавить исключение
       parameters:
         - name: masterId
@@ -66,6 +75,8 @@ paths:
 
   /masters/available:
     get:
+      tags:
+        - masters
       summary: Список свободных мастеров
       parameters:
         - name: category

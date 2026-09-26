@@ -111,23 +111,23 @@ Availability Service (Сервис доступности и расписани�
 
 *  {% colwidth=[156] %}
 
-   **Сервис заявок**
+   
 
 *  {% colwidth=[156] %}
 
-   Перевести мастера в статус «занят»
+   
 
 *  {% colwidth=[156] %}
 
-   Автоматически обновить статус мастера при назначении ему заявки
+   
 
 *  {% colwidth=[192] %}
 
-   masterId, requestId
+   
 
 *  {% colwidth=[239] %}
 
-   masterId, status = ONLINE_BUSY
+   
 
 {% /table %}
 
@@ -135,4 +135,4 @@ Availability Service (Сервис доступности и расписани�
 
 [openapi:./_index-3.yaml:true]
 
-###
+### 
