@@ -5,5 +5,5 @@ flowchart TD
     
     TicketService --> Catalog["Catalog Service"]
     TicketService --> Payment["Payment Service"]
-    TicketService --> Notification["Notification Service"]
+    
     TicketService <-->|"SQL"| TicketDB[("PostgreSQL")]
