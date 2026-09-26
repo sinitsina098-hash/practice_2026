@@ -1,17 +1,20 @@
 swagger: "2.0"
 
 info:
-  description: " Analytics Service"
+  description: "Analytics Service"
   version: "1.0.0"
   title: "EventHub Analytics Service"
 
 host: "api.eventhub.example.com"
 basePath: "/v1"
+
 tags:
 - name: "events"
   description: "Данные мероприятий для расчета статистики"
+
 - name: "sales"
   description: "Регистрация продаж и отмен"
+
 - name: "statistics"
   description: "Получение статистики продаж"
 
@@ -20,7 +23,7 @@ schemes:
 
 paths:
 
-  /events/{eventId}/capacity:
+  /events/capacity:
     put:
       tags:
       - "events"
@@ -34,7 +37,7 @@ paths:
 
       parameters:
       - name: "eventId"
-        in: "path"
+        in: "query"
         required: true
         type: "string"
 
@@ -49,7 +52,7 @@ paths:
           description: "Количество билетов успешно сохранено"
 
         "400":
-          description: "Некорректное количество билетов"
+          description: "Некорректные данные мероприятия"
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -72,6 +75,11 @@ paths:
       - "application/json"
 
       parameters:
+      - name: "eventId"
+        in: "query"
+        required: true
+        type: "string"
+
       - in: "body"
         name: "body"
         required: true
@@ -95,7 +103,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 
 
-  /sales/{saleId}/cancellations:
+  /sales/cancellations:
     post:
       tags:
       - "sales"
@@ -109,7 +117,7 @@ paths:
 
       parameters:
       - name: "saleId"
-        in: "path"
+        in: "query"
         required: true
         type: "string"
 
@@ -141,7 +149,7 @@ paths:
             $ref: "#/definitions/ErrorResponse"
 
 
-  /events/{eventId}/statistics:
+  /events/statistics:
     get:
       tags:
       - "statistics"
@@ -152,7 +160,7 @@ paths:
 
       parameters:
       - name: "eventId"
-        in: "path"
+        in: "query"
         required: true
         type: "string"
 
@@ -173,7 +181,7 @@ paths:
             $ref: "#/definitions/EventStatistics"
 
         "400":
-          description: "Некорректно указан период статистики"
+          description: "Некорректно указан eventId или период статистики"
           schema:
             $ref: "#/definitions/ErrorResponse"
 
@@ -193,27 +201,21 @@ definitions:
   CapacityRequest:
     type: "object"
     required:
-    - "eventId"
     - "totalTickets"
+
     properties:
-      eventId:
-        type: "string"
-        
       totalTickets:
         type: "integer"
+
 
   CreateSaleRequest:
     type: "object"
     required:
-    - "eventId"
     - "ticketId"
     - "price"
     - "purchasedAt"
 
     properties:
-      eventId:
-        type: "string"
-
       ticketId:
         type: "string"
 
@@ -223,11 +225,13 @@ definitions:
       purchasedAt:
         type: "string"
 
+
   Sale:
     type: "object"
     properties:
       saleId:
         type: "string"
+
 
   CancellationRequest:
     type: "object"
@@ -261,7 +265,7 @@ definitions:
     - "updatedAt"
 
     properties:
-    
+
       totalTickets:
         type: "integer"
 
@@ -296,7 +300,7 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/RevenuePeriod"
-          
+
       updatedAt:
         type: "string"
 
@@ -306,7 +310,7 @@ definitions:
     properties:
       periodStart:
         type: "string"
-        
+
       periodEnd:
         type: "string"
 
@@ -319,7 +323,7 @@ definitions:
     properties:
       periodStart:
         type: "string"
-        
+
       periodEnd:
         type: "string"
 
