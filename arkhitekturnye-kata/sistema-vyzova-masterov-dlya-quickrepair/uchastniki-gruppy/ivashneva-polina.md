@@ -1,13 +1,6 @@
 ---
 order: 3
-title: ФИО Шаблон
----
-
----
-
-order: 2
-title: "Ивашнева Полина Ивановна_MS Cartography Service"
-
+title: Ивашнева Полина Ивановна_MS Cartography Service
 ---
 
 ## 1\. 📖 Описание функциональных границ микросервиса
@@ -246,4 +239,4 @@ title: "Ивашнева Полина Ивановна_MS Cartography Service"
 
 [openapi:./_index-2.yaml:true]
 
-###
+### 
