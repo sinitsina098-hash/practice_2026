@@ -192,7 +192,7 @@ aliases:
      "role": "user",
      "createdAt": "2026-10-09T10:30:00Z",
      "updatedAt": "2026-10-09T10:30:00Z",
-     "deletedAt": null
+     "deletedAt": "2026-10-09T10:30:00Z"
    }
    ```
 
