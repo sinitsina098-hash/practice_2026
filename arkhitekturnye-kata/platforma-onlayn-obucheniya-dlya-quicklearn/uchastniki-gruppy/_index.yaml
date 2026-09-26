@@ -1,198 +1,269 @@
-openapi: "3.0.1"
+openapi: 3.0.3
 info:
-  version:  1.0.0 | 01.04.2024
-  title: Наименование сервиса
-  description: Краткое описание api-интерфейса сервиса
+  title: orders-service
+  description: API микросервиса заявок QuickFix. Отвечает за создание заявки на ремонт, приём заявки мастером и отметку о завершении работы.
+  version: "1.0.0 | 26.09.2026"
 security:
   - BearerAuth: []
-  - OAuth2: []
 servers:
   - url: /api/v1
-  - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
-    variables:
-        Host:
-          default: host.ru
-          description: Host на котором развернут микросервис
-        EnvironmentPrefix:
-          default: ''
-          description: |
-            Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
-            Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
-        MicroserviceName:
-          default: microservice
-          description: |
-            Имя под которым микросервис развернут в кластере микросервисов
-            Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
 tags:
-    - name: resources operations
-      description: Тэгирование методов для логической группировки по предметной области, например методы работающие с информацией по ресурсам стоит тэгировать как resources operations
-paths:
-  /resources:
-    get:
-      tags: 
-        - resources operations
-      operationId: GetResource
-      summary: Получить список ресурсов
-      description: Метод возвращает список ресурсов. При запросе можно отфильтровать список
-      parameters:
-        - in: query
-          name: resourceFilter
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceFilter"
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ResourcesRp"
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+  - name: Orders
+    description: Операции с заявками
 
+paths:
+  /orders:
     post:
-      tags: 
-        - resources operations
-      operationId: CreateResource
-      summary: Создать объект
-      description: Метод создает объект с его уникальным идентификатором
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResourcesRp'
-      responses:
-        201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                  $ref: '#/components/parameters/resourceId'
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-  /resources/{resourceId}:  
-    delete:
-      tags: 
-        - resources operations
-      operationId: deleteResource
-      summary: Удалить объект по его идентификатору
-      description: Метод удаляет объект по его идентификатору
-      parameters:
-        - in: path
-          name: resourceId
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceId"
-      responses:
-        200:
-          description: OK
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
-    put:
-      tags: 
-        - resources operations
-      operationId: UpdateResource
-      summary: Обновить объект
-      description: Метод обновляет объект по его идентификатору по атрибутам переданным в запросе
-      parameters:
-        - in: path
-          name: resourceId
-          required: true
-          schema:
-            $ref: "#/components/parameters/resourceId"
+      tags: [Orders]
+      summary: Создать заявку
+      description: Заказчик создаёт заявку на ремонт с описанием проблемы и адресом
+      operationId: createOrder
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ResourceRq'
-              
+              $ref: '#/components/schemas/CreateOrderRq'
       responses:
-        200:
-          description: OK
-        204:
-          description: No Content
-        400:
-          description: Bad Request
-        401:
-          description: Unauthorized
-        404:
-          description: Not Found
-        500:
-          description: Internal Service Error
+        '201':
+          description: Заявка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags: [Orders]
+      summary: Получить список заявок
+      description: Возвращает список заявок, отфильтрованных по статусу и городу. Используется сервисом подбора мастеров для поиска новых заявок
+      operationId: getOrders
+      parameters:
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/city'
+      responses:
+        '200':
+          description: Список заявок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderRs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Получить заявку по идентификатору
+      description: Возвращает текущий статус и детали заявки
+      operationId: getOrderById
+      parameters:
+        - $ref: '#/components/parameters/orderId'
+      responses:
+        '200':
+          description: Данные заявки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/accept:
+    post:
+      tags: [Orders]
+      summary: Принять заявку в работу
+      description: Мастер принимает заявку первым — заявка закрывается для остальных мастеров
+      operationId: acceptOrder
+      parameters:
+        - $ref: '#/components/parameters/orderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptOrderRq'
+      responses:
+        '200':
+          description: Заявка успешно принята
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Заявка уже принята другим мастером или недоступна для приёма
+
+  /orders/{orderId}/complete:
+    post:
+      tags: [Orders]
+      summary: Отметить заявку как выполненную
+      description: Мастер отмечает завершение работы по заявке
+      operationId: completeOrder
+      parameters:
+        - $ref: '#/components/parameters/orderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteOrderRq'
+      responses:
+        '200':
+          description: Заявка завершена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Заявка не находится в статусе "в работе"
+
 components:
   securitySchemes:
-      BearerAuth:
-          type: http
-          scheme: bearer
-          bearerFormat: JWT
-      OAuth2:
-         type: oauth2
-         flows:
-          password:
-            tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
-            scopes: {}
-  parameters:  
-    resourceId:
-      name: resourceId
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    orderId:
+      name: orderId
       in: path
-      description: Уникальный идентификатор
       required: true
+      description: Идентификатор заявки
+      schema:
+        type: integer
+        format: int64
+        example: 10245
+    status:
+      name: status
+      in: query
+      required: false
+      description: "Фильтр по статусу заявки: new, accepted, completed, cancelled"
       schema:
         type: string
-        format: uuid
-    resourceFilter:
-      name: resourceFilter
+        example: new
+    city:
+      name: city
       in: query
-      description: Фильтр параметр
-      required: true
+      required: false
+      description: Фильтр по городу
       schema:
-        $ref: '#/components/schemas/resourceFilter'
+        type: string
+        example: "Казань"
+
   schemas:
-    resourceFilter:
-      description: Фильтр параметр ресурса
-      type: string
-    ResourcesRp: 
-        description: Список объектов ресурс
-        type: array
-        items:
-          $ref: '#/components/schemas/Resource'
-    Resource:
+    CreateOrderRq:
       type: object
-      description: Объект ресурс
-      required: 
-        - resourceId
+      required: [customerId, category, description, address, latitude, longitude]
       properties:
-        Att1:
-         type: string
-         description: Простой атрибут типа строка
-        Att2:
-         type: integer
-         description: Простой атрибут типа число
-        Att3:
-         type: boolean
-         description: Простой атрибут булевого типа
-    ResourceRq:
-      $ref: '#/components/schemas/Resource'
+        customerId:
+          type: integer
+          format: int64
+          example: 5001
+        category:
+          type: string
+          description: "Категория услуги: plumber, electrician, furniture_assembly"
+          example: plumber
+        description:
+          type: string
+          example: "Течёт кран на кухне"
+        address:
+          type: string
+          example: "г. Казань, ул. Баумана, д. 12, кв. 5"
+        latitude:
+          type: number
+          format: double
+          example: 55.7887
+        longitude:
+          type: number
+          format: double
+          example: 49.1221
+
+    AcceptOrderRq:
+      type: object
+      required: [masterId]
+      properties:
+        masterId:
+          type: integer
+          format: int64
+          example: 7031
+
+    CompleteOrderRq:
+      type: object
+      required: [masterId]
+      properties:
+        masterId:
+          type: integer
+          format: int64
+          example: 7031
+        comment:
+          type: string
+          example: "Заменён смеситель"
+
+    OrderRs:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          example: 10245
+        status:
+          type: string
+          description: "new | accepted | completed | cancelled"
+          example: accepted
+        customerId:
+          type: integer
+          format: int64
+          example: 5001
+        masterId:
+          type: integer
+          format: int64
+          nullable: true
+          example: 7031
+        category:
+          type: string
+          example: plumber
+        description:
+          type: string
+          example: "Течёт кран на кухне"
+        address:
+          type: string
+          example: "г. Казань, ул. Баумана, д. 12, кв. 5"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-09-26T09:15:00Z"
+        acceptedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-09-26T09:17:30Z"
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+  responses:
+    BadRequest:
+      description: Некорректные входные данные
+    Unauthorized:
+      description: Отсутствует или недействителен токен доступа
+    NotFound:
+      description: Заявка с указанным идентификатором не найдена
     
    
