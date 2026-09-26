@@ -113,7 +113,7 @@ order: 1
 
 :::
 
-![](./uchastniki-gruppy.webp){width=1536px height=1024px}
+![](./_index.webp){width=1536px height=1024px}
 
 :::tip 
 
@@ -127,7 +127,7 @@ order: 1
 
 :::
 
-![](./uchastniki-gruppy-2.webp){width=1536px height=1024px}
+![](./_index-2.webp){width=1536px height=1024px}
 
 ## 🚩 4. Главный риск выбранного решения
 

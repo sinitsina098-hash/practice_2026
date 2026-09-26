@@ -103,4 +103,4 @@ title: ФИО Гордиенко Анастасия Пример
 
 [openapi:./fio-proektirovanie-api-2.yaml:true]
 
-### 
+###
