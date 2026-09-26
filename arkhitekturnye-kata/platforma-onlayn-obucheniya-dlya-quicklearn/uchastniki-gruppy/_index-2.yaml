@@ -1,0 +1,230 @@
+openapi: 3.0.0
+
+info:
+  title: QuickFix Rating Service
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081/api
+
+paths:
+
+  /ratings:
+    post:
+      summary: Добавить оценку мастеру
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingRequest'
+
+      responses:
+        '201':
+          description: Оценка добавлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingResult'
+
+        '400':
+          description: Неверные данные
+
+        '404':
+          description: Заявка или мастер не найдены
+
+        '409':
+          description: Заявка уже оценена
+
+
+  /masters/{masterId}/rating:
+    get:
+      summary: Получить рейтинг мастера
+
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Рейтинг мастера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterRating'
+
+        '404':
+          description: Мастер не найден
+
+
+  /masters/{masterId}/reviews:
+    get:
+      summary: Получить отзывы о мастере
+
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Список отзывов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+
+        '404':
+          description: Мастер не найден
+
+
+  /masters/{masterId}/rating-profile:
+    get:
+      summary: Посмотреть свой рейтинг и отзывы
+
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          schema:
+            type: integer
+
+      responses:
+        '200':
+          description: Рейтинг и отзывы мастера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MasterProfile'
+
+        '404':
+          description: Мастер не найден
+
+
+components:
+
+  schemas:
+
+    RatingRequest:
+      type: object
+      required:
+        - orderId
+        - customerId
+        - masterId
+        - score
+
+      properties:
+
+        orderId:
+          type: integer
+          description: ID заявки
+          example: 155
+
+        customerId:
+          type: integer
+          description: ID заказчика
+          example: 35
+
+        masterId:
+          type: integer
+          description: ID мастера
+          example: 20
+
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Оценка от 1 до 5
+          example: 5
+
+        comment:
+          type: string
+          description: Отзыв
+          example: Быстро выполнил работу
+
+
+    RatingResult:
+      type: object
+      properties:
+
+        ratingId:
+          type: integer
+          description: ID оценки
+          example: 75
+
+        result:
+          type: string
+          example: Оценка сохранена
+
+
+    MasterRating:
+      type: object
+      properties:
+
+        masterId:
+          type: integer
+          example: 20
+
+        averageRating:
+          type: number
+          example: 4.8
+
+        ratingsCount:
+          type: integer
+          example: 30
+
+
+    Review:
+      type: object
+      properties:
+
+        ratingId:
+          type: integer
+          example: 70
+
+        customerId:
+          type: integer
+          example: 45
+
+        score:
+          type: integer
+          example: 5
+
+        comment:
+          type: string
+          example: Быстро выполнил работу
+
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-09-26T12:00:00Z'
+
+
+    MasterProfile:
+      type: object
+      properties:
+
+        masterId:
+          type: integer
+          example: 120
+
+        averageRating:
+          type: number
+          example: 4.8
+
+        ratingsCount:
+          type: integer
+          example: 30
+
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
