@@ -168,4 +168,4 @@
 
 [openapi:./fio-proektirovanie-api.yaml:true]
 
-### 
+###
