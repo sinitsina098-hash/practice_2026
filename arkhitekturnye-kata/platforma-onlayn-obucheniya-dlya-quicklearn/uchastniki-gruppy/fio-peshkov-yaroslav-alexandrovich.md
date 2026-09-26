@@ -7,7 +7,7 @@ title: ФИО Пешков Ярослав Александрович
 
 ### 1\.1 Диаграмма компонентов архитектуры
 
-![](./fio-peshkov-yaroslav-alexandrovich.webp){width=832px height=180px}
+![](./fio-peshkov-yaroslav-alexandrovich.webp){width=1786px height=550px}
 
 ### 1\.2 Описание микросервиса
 
