@@ -41,15 +41,16 @@ components:
         - name
         - points
       properties:
-        login:
-         type: string
-         description: Логин
-        password:
-         type: string
-         description: Пароль
-
-    ResourceRq:
-      $ref: '#/components/schemas/Resource'
+        name:
+          type: string
+          description: Название зоны
+          example: "Центральный район"
+        points:
+          type: array
+          description: Список координат границы зоны
+          items:
+            type: string
+          example: ["55.75, 37.61", "55.76, 37.62"]
     
     ZoneResponse:
       type: object
