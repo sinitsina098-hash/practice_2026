@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: Payment Service API
+  version: 1.0.0
+  description: API для оплаты парковки
+
+servers:
+  - url: https://api.parking-city.ru/payment/v1
+
+paths:
+  /payments:
+    post:
+      summary: Провести оплату
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Оплата прошла
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Ошибка в данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    PaymentRequest:
+      type: object
+      required:
+        - sessionId
+        - amount
+        - paymentMethod
+        - driverId
+      properties:
+        sessionId:
+          type: string
+          description: ID сессии
+        amount:
+          type: number
+          description: Сумма
+        paymentMethod:
+          type: string
+          enum: [CARD, SBP]
+          description: Способ оплаты
+        cardNumber:
+          type: string
+          description: Номер карты (если оплата картой)
+        phoneNumber:
+          type: string
+          description: Телефон для СБП (если оплата через СБП)
+        driverId:
+          type: string
+          description: ID водителя
+
+    PaymentResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: ID транзакции
+        status:
+          type: string
+          description: Статус (прошла или не прошла)
+        message:
+          type: string
+          description: Сообщение
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Код ошибки
+        message:
+          type: string
+          description: Текст ошибки
