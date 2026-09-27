@@ -1,5 +1,5 @@
 ---
-order: 1.5
+order: 5
 title: Кошелева Анна Константиновна
 aliases:
   - path: >-
