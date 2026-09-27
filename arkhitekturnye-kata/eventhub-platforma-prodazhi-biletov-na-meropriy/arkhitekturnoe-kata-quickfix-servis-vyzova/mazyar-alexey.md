@@ -119,7 +119,7 @@ Analytics Service обеспечивает следующую функциона
 
 ---
 
-*  {% colwidth=[156] %}
+*  {% colwidth=[184] %}
 
    Ticket Service
 
@@ -185,4 +185,4 @@ Analytics Service обеспечивает следующую функциона
 
 [openapi:./_index.yaml:true]
 
-### 
+###
