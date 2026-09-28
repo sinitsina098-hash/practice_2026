@@ -1,0 +1,150 @@
+openapi: 3.0.3
+info:
+  title: Сервис программ тренировок (FitTrack)
+  description: Каталог программ, создание и публикация программ тренером
+  version: 1.0.0
+servers:
+  - url: https://api.fittrack.ru/v1
+tags:
+  - name: программы
+    description: Методы для работы с программами тренировок
+paths:
+  /programs:
+    get:
+      tags: [программы]
+      summary: Получить список программ (каталог)
+      parameters:
+        - name: goal
+          in: query
+          description: Фильтр по цели тренировок
+          schema: { type: string }
+        - name: accessType
+          in: query
+          description: Фильтр по типу доступа
+          schema: { type: string, enum: [free, premium] }
+      responses:
+        '200':
+          description: Список программ
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Program' } }
+        '400':
+          description: Некорректные параметры запроса
+    post:
+      tags: [программы]
+      summary: Создать программу (тренер)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProgramInput' }
+      responses:
+        '201':
+          description: Программа создана
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '400':
+          description: Некорректные данные программы
+        '401':
+          description: Нет прав доступа
+  /programs/{programId}:
+    get:
+      tags: [программы]
+      summary: Получить программу по идентификатору
+      parameters:
+        - name: programId
+          in: path
+          required: true
+          description: Идентификатор программы
+          schema: { type: string }
+      responses:
+        '200':
+          description: Программа найдена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '404':
+          description: Программа не найдена
+    put:
+      tags: [программы]
+      summary: Обновить программу
+      parameters:
+        - name: programId
+          in: path
+          required: true
+          description: Идентификатор программы
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProgramInput' }
+      responses:
+        '200':
+          description: Программа обновлена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Program' }
+        '404':
+          description: Программа не найдена
+    delete:
+      tags: [программы]
+      summary: Удалить программу
+      parameters:
+        - name: programId
+          in: path
+          required: true
+          description: Идентификатор программы
+          schema: { type: string }
+      responses:
+        '200':
+          description: Программа удалена
+        '404':
+          description: Программа не найдена
+  /programs/{programId}/publish:
+    post:
+      tags: [программы]
+      summary: Опубликовать программу в каталоге
+      parameters:
+        - name: programId
+          in: path
+          required: true
+          description: Идентификатор программы
+          schema: { type: string }
+      responses:
+        '200':
+          description: Программа опубликована
+        '404':
+          description: Программа не найдена
+components:
+  schemas:
+    Program:
+      type: object
+      description: Программа тренировок
+      properties:
+        programId: { type: string, description: Идентификатор программы }
+        title: { type: string, description: Название программы }
+        description: { type: string, description: Описание программы }
+        goal: { type: string, description: Цель тренировок }
+        accessType: { type: string, enum: [free, premium], description: Тип доступа }
+        price: { type: number, description: Цена премиум-подписки }
+        exercises: { type: array, items: { $ref: '#/components/schemas/Exercise' } }
+    ProgramInput:
+      type: object
+      description: Данные программы от тренера
+      required: [title, goal, accessType, exercises]
+      properties:
+        title: { type: string, description: Название программы }
+        description: { type: string, description: Описание программы }
+        goal: { type: string, description: Цель тренировок }
+        accessType: { type: string, enum: [free, premium], description: Тип доступа }
+        price: { type: number, description: Цена премиум-подписки }
+        exercises: { type: array, items: { $ref: '#/components/schemas/Exercise' } }
+    Exercise:
+      type: object
+      description: Упражнение в программе
+      properties:
+        name: { type: string, description: Название упражнения }
+        sets: { type: integer, description: Количество подходов }
+        reps: { type: integer, description: Количество повторений }
