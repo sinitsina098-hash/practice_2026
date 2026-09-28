@@ -1,386 +1,210 @@
-openapi: 3.0.0
+openapi: 3.0.3
 
 info:
-  title: QuickFix Rating Service API
-  description: >
-    API микросервиса Rating Service системы QuickFix.
-    Микросервис отвечает за создание оценок и отзывов о мастерах,
-    получение рейтинга мастера, получение отзывов и отображение
-    мастеру его собственного рейтинга и отзывов.
-  version: 1.0.0
+  title: Availability Service
+  description: API микросервиса для работы с расписанием мастеров QuickFix
+  version: "1.0.0 | 26.09.2026"
+
+security:
+  - BasicAuth: []
 
 servers:
-  - url: http://localhost:8081/api
-    description: Локальный сервер Rating Service
+  - url: /api/v1
+    description: Сервер Availability Service
 
 tags:
-  - name: Ratings
-    description: Создание оценок и отзывов о мастерах
-
-  - name: Masters
-    description: Получение рейтинга и отзывов мастеров
-
+  - name: Availability
+    description: Операции с расписанием мастеров
 
 paths:
+  /masters/{masterId}/availability:
+    get:
+      tags:
+        - Availability
+      summary: Получить расписание мастера
+      description: Возвращает рабочие интервалы мастера за выбранный период
+      operationId: getMasterAvailability
+      deprecated: false
+      parameters:
+        - $ref: "#/components/parameters/masterId"
+        - $ref: "#/components/parameters/from"
+        - $ref: "#/components/parameters/to"
+      responses:
+        "200":
+          description: Расписание мастера получено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvailabilitiesRp"
+        "400":
+          description: Неверный запрос
+        "403":
+          description: Доступ запрещен
+        "404":
+          description: Мастер не найден
 
-  /ratings:
     post:
       tags:
-        - Ratings
-
-      summary: Создать оценку мастеру
-
-      description: >
-        Создаёт оценку и текстовый отзыв о мастере
-        после завершения заявки.
-        Одну завершённую заявку можно оценить только один раз.
-
-      operationId: createRating
-
+        - Availability
+      summary: Создать рабочий интервал
+      description: Добавляет новый рабочий интервал в расписание мастера
+      operationId: createAvailability
+      deprecated: false
+      parameters:
+        - $ref: "#/components/parameters/masterId"
       requestBody:
-        description: Данные оценки мастера
         required: true
-
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRatingRequest'
-
+              $ref: "#/components/schemas/AvailabilityRq"
       responses:
-
-        '201':
-          description: Оценка успешно сохранена
-
+        "200":
+          description: Рабочий интервал создан
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateRatingResponse'
+                $ref: "#/components/schemas/Availability"
+        "400":
+          description: Неверный запрос
+        "403":
+          description: Доступ запрещен
+        "404":
+          description: Мастер не найден
 
-        '400':
-          description: Некорректные входные данные
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-        '404':
-          description: Заявка, заказчик или мастер не найдены
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-        '409':
-          description: Данная заявка уже была оценена
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-
-  /masters/{masterId}/rating:
-    get:
+  /masters/{masterId}/availability/{intervalId}:
+    put:
       tags:
-        - Masters
-
-      summary: Получить рейтинг мастера
-
-      description: >
-        Возвращает текущий средний рейтинг мастера
-        и количество полученных им оценок.
-
-      operationId: getMasterRating
-
+        - Availability
+      summary: Изменить рабочий интервал
+      description: Обновляет данные существующего рабочего интервала
+      operationId: updateAvailability
+      deprecated: false
       parameters:
-        - name: masterId
-          in: path
-          description: Идентификатор мастера
-          required: true
-
-          schema:
-            type: integer
-            format: int64
-
+        - $ref: "#/components/parameters/masterId"
+        - $ref: "#/components/parameters/intervalId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvailabilityRq"
       responses:
-
-        '200':
-          description: Рейтинг мастера успешно получен
-
+        "200":
+          description: Рабочий интервал изменен
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MasterRating'
+                $ref: "#/components/schemas/Availability"
+        "400":
+          description: Неверный запрос
+        "403":
+          description: Доступ запрещен
+        "404":
+          description: Рабочий интервал не найден
 
-        '404':
-          description: Данные о мастере не найдены
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-
-  /masters/{masterId}/reviews:
-    get:
+    delete:
       tags:
-        - Masters
-
-      summary: Получить отзывы о мастере
-
-      description: >
-        Возвращает список оценок и текстовых отзывов
-        о выбранном мастере.
-
-      operationId: getMasterReviews
-
+        - Availability
+      summary: Удалить рабочий интервал
+      description: Удаляет рабочий интервал из расписания мастера
+      operationId: deleteAvailability
+      deprecated: false
       parameters:
-        - name: masterId
-          in: path
-          description: Идентификатор мастера
-          required: true
-
-          schema:
-            type: integer
-            format: int64
-
+        - $ref: "#/components/parameters/masterId"
+        - $ref: "#/components/parameters/intervalId"
       responses:
-
-        '200':
-          description: Список отзывов успешно получен
-
-          content:
-            application/json:
-              schema:
-                type: array
-
-                items:
-                  $ref: '#/components/schemas/Review'
-
-        '404':
-          description: Данные о мастере не найдены
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-
-  /masters/{masterId}/rating-profile:
-    get:
-      tags:
-        - Masters
-
-      summary: Получить собственный рейтинг и отзывы мастера
-
-      description: >
-        Возвращает средний рейтинг, количество оценок
-        и список отзывов текущего мастера.
-        Метод используется для отображения мастеру
-        информации о его рейтинге.
-
-      operationId: getMasterRatingProfile
-
-      parameters:
-        - name: masterId
-          in: path
-          description: Идентификатор мастера
-          required: true
-
-          schema:
-            type: integer
-            format: int64
-
-      responses:
-
-        '200':
-          description: Рейтинг и отзывы мастера успешно получены
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MasterRatingProfile'
-
-        '404':
-          description: Данные о мастере не найдены
-
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+        "200":
+          description: Рабочий интервал удален
+        "403":
+          description: Доступ запрещен
+        "404":
+          description: Рабочий интервал не найден
 
 components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    masterId:
+      name: masterId
+      in: path
+      required: true
+      description: Идентификатор мастера
+      schema:
+        type: integer
+        format: int64
+        example: 1
+
+    intervalId:
+      name: intervalId
+      in: path
+      required: true
+      description: Идентификатор рабочего интервала
+      schema:
+        type: integer
+        format: int64
+        example: 10
+
+    from:
+      name: from
+      in: query
+      required: true
+      description: Начало периода
+      schema:
+        type: string
+        example: "2026-10-05 09:00"
+
+    to:
+      name: to
+      in: query
+      required: true
+      description: Конец периода
+      schema:
+        type: string
+        example: "2026-10-05 18:00"
 
   schemas:
-
-    CreateRatingRequest:
+    AvailabilityRq:
       type: object
-
-      required:
-        - orderId
-        - customerId
-        - masterId
-        - score
-
       properties:
+        start:
+          type: string
+          description: Начало рабочего интервала
+          example: "2026-10-05 09:00"
+        end:
+          type: string
+          description: Конец рабочего интервала
+          example: "2026-10-05 18:00"
+        status:
+          type: string
+          description: Статус доступности мастера
+          example: AVAILABLE
 
-        orderId:
+    Availability:
+      type: object
+      properties:
+        id:
           type: integer
           format: int64
-          description: Идентификатор завершённой заявки
-          example: 152
-
-        customerId:
-          type: integer
-          format: int64
-          description: Идентификатор заказчика
-          example: 35
-
+          example: 10
         masterId:
           type: integer
           format: int64
-          description: Идентификатор мастера
-          example: 18
-
-        score:
-          type: integer
-          minimum: 1
-          maximum: 5
-          description: Оценка работы мастера от 1 до 5
-          example: 5
-
-        comment:
+          example: 1
+        start:
           type: string
-          description: Текстовый отзыв заказчика
-          example: Мастер быстро и качественно выполнил работу
-
-
-    CreateRatingResponse:
-      type: object
-
-      properties:
-
-        ratingId:
-          type: integer
-          format: int64
-          description: Идентификатор созданной оценки
-          example: 73
-
-        result:
+          example: "2026-10-05 09:00"
+        end:
           type: string
-          description: Результат сохранения оценки
-          example: Оценка успешно сохранена
-
-
-    MasterRating:
-      type: object
-
-      properties:
-
-        masterId:
-          type: integer
-          format: int64
-          description: Идентификатор мастера
-          example: 18
-
-        averageRating:
-          type: number
-          format: double
-          description: Средний рейтинг мастера
-          example: 4.8
-
-        ratingsCount:
-          type: integer
-          description: Количество полученных мастером оценок
-          example: 27
-
-
-    Review:
-      type: object
-
-      properties:
-
-        ratingId:
-          type: integer
-          format: int64
-          description: Идентификатор оценки
-          example: 73
-
-        customerId:
-          type: integer
-          format: int64
-          description: Идентификатор заказчика, оставившего отзыв
-          example: 35
-
-        masterId:
-          type: integer
-          format: int64
-          description: Идентификатор мастера
-          example: 18
-
-        score:
-          type: integer
-          minimum: 1
-          maximum: 5
-          description: Оценка работы мастера
-          example: 5
-
-        comment:
+          example: "2026-10-05 18:00"
+        status:
           type: string
-          description: Текст отзыва
-          example: Мастер быстро и качественно выполнил работу
+          example: AVAILABLE
 
-        createdAt:
-          type: string
-          format: date-time
-          description: Дата и время создания оценки
-          example: '2026-09-26T12:00:00Z'
-
-
-    MasterRatingProfile:
-      type: object
-
-      properties:
-
-        masterId:
-          type: integer
-          format: int64
-          description: Идентификатор мастера
-          example: 18
-
-        averageRating:
-          type: number
-          format: double
-          description: Средний рейтинг мастера
-          example: 4.8
-
-        ratingsCount:
-          type: integer
-          description: Количество полученных оценок
-          example: 27
-
-        reviews:
-          type: array
-          description: Список оценок и отзывов мастера
-
-          items:
-            $ref: '#/components/schemas/Review'
-
-
-    Error:
-      type: object
-
-      properties:
-
-        code:
-          type: string
-          description: Код ошибки
-          example: ERROR_CODE
-
-        message:
-          type: string
-          description: Описание ошибки
-          example: Описание возникшей ошибки
+    AvailabilitiesRp:
+      type: array
+      items:
+        $ref: "#/components/schemas/Availability"

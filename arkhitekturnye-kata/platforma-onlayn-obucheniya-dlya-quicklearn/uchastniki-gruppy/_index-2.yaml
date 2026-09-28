@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 openapi: 3.0.0
 
 info:
@@ -271,4 +272,76 @@ components:
         reviews:
           type: array
           items:
+<<<<<<< Updated upstream
             $ref: '#/components/schemas/Review'
+=======
+            $ref: '#/components/schemas/Review'
+
+
+    Error:
+      type: object
+
+      properties:
+
+        code:
+          type: string
+          description: Код ошибки
+          example: ERROR_CODE
+
+        message:
+          type: string
+          description: Описание ошибки
+          example: Описание возникшей ошибки
+=======
+openapi: 3.0.3
+
+info:
+  title: Availability Service
+  description: API для получения информации о доступности мастера QuickFix
+  version: "1.0.0"
+
+servers:
+  - url: /api/v1
+
+paths:
+  /masters/{masterId}/availability:
+    get:
+      summary: Получить доступность мастера
+      description: Возвращает рабочий интервал и статус мастера
+      parameters:
+        - name: masterId
+          in: path
+          required: true
+          description: Идентификатор мастера
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Информация о доступности получена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Availability"
+        "404":
+          description: Мастер не найден
+
+components:
+  schemas:
+    Availability:
+      type: object
+      properties:
+        masterId:
+          type: integer
+          example: 1
+        start:
+          type: string
+          example: "2026-10-05 09:00"
+        end:
+          type: string
+          example: "2026-10-05 18:00"
+        status:
+          type: string
+          example: AVAILABLE
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
