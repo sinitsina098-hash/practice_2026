@@ -1,0 +1,327 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0 | 26.09.2026
+  title: PetService
+  description: >-
+    Pet Service  - модуль профилей питомцев платформы PetCare. Отвечает за
+    создание, редактирование, просмотр и удаление профилей животных: имя, вид,
+    порода, дата рождения и фото питомца.
+security:
+  - BearerAuth: []
+  - OAuth2: []
+servers:
+  - url: /api/v1
+  - url: 'https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1'
+    variables:
+      Host:
+        default: host.ru
+        description: Host на котором развернут микросервис
+      EnvironmentPrefix:
+        default: ''
+        description: >
+          Префикс конкретного тестового стенда, выделенного под задачу (feature
+          environment).
+
+          Фактически позволяет окончательно идентифицировать host микросервиса,
+          т.к. хостинге мс в кластере они все хостятся на одном dns - условном
+          host.ru
+      MicroserviceName:
+        default: microservice
+        description: >
+          Имя под которым микросервис развернут в кластере микросервисов
+
+          Фактически позволяет окончательно идентифицировать host микросервиса
+          при обращениях к нему
+tags:
+  - name: pet operations
+    description: >-
+      Тэгирование методов для логической группировки по предметной области,
+      например методы работающие с информацией по ресурсам стоит тэгировать как
+      resources operations
+paths:
+  /pets:
+    get:
+      tags:
+        - pet operations
+      operationId: GetPets
+      summary: Получить питомцев владельца
+      description: Метод возвращает список профилей питомцев по идентификатору владельца
+      parameters:
+        - in: query
+          name: ownerId
+          required: true
+          schema:
+            $ref: '#/components/parameters/ownerId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetsRp'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Service Error
+    post:
+      tags:
+        - pet operations
+      operationId: CreatePet
+      summary: Создать профиль питомца
+      description: Метод проверяет владельца, создаёт новый профиль питомца и возвращает его уникальный идентификатор
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PetCreatedRp'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Service Error
+  '/pets/{petId}':
+    get:
+      tags:
+        - pet operations
+      operationId: GetPetById
+      summary: Найти питомца по идентификатору
+      description: Метод возвращает профиль одного питомца
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            $ref: '#/components/parameters/petId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Service Error
+    delete:
+      tags:
+        - pet operations
+      operationId: DeletePet
+      summary: Удалить профиль питомца
+      description: Метод удаляет профиль питомца по его идентификатору
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            $ref: '#/components/parameters/petId'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Service Error
+    put:
+      tags:
+        - pet operations
+      operationId: UpdatePet
+      summary: Обновить профиль питомца
+      description: 'Метод обновляет профиль питомца по атрибутам, переданным в запросе'
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            $ref: '#/components/parameters/petId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Service Error
+  '/pets/{petId}/photo':
+    post:
+      tags:
+        - pet operations
+      operationId: UploadPetPhoto
+      summary: Добавить фото питомца
+      description: Метод загружает фото питомца и сохраняет его в профиле
+      parameters:
+        - in: path
+          name: petId
+          required: true
+          schema:
+            $ref: '#/components/parameters/petId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл фотографии питомца
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Service Error
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    OAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: >-
+            https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
+          scopes: {}
+  parameters:
+    petId:
+      name: petId
+      in: path
+      description: Уникальный идентификатор питомца
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ownerId:
+      name: ownerId
+      in: query
+      description: Уникальный идентификатор владельца
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    PetsRp:
+      description: Список профилей питомцев
+      type: array
+      items:
+        $ref: '#/components/schemas/Pet'
+    PetCreatedRp:
+      type: object
+      description: Идентификатор созданного профиля питомца
+      required:
+        - petId
+      properties:
+        petId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор созданного питомца
+    PetRequest:
+      type: object
+      description: 'Данные питомца, передаваемые при создании или обновлении профиля'
+      required:
+        - ownerId
+        - name
+        - species
+      properties:
+        ownerId:
+          type: string
+          format: uuid
+          description: Идентификатор владельца
+        name:
+          type: string
+          description: Кличка питомца
+          example: Балбес
+        species:
+          type: string
+          description: Вид животного
+          enum:
+            - собака
+            - кошка
+            - попугай
+            - кролик
+            - другое
+        breed:
+          type: string
+          description: Порода питомца
+          example: бульдог
+        birthDate:
+          type: string
+          format: date
+          description: Дата рождения питомца
+    Pet:
+      type: object
+      description: Профиль питомца
+      required:
+        - petId
+      properties:
+        petId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор питомца
+        ownerId:
+          type: string
+          format: uuid
+          description: Идентификатор владельца
+        name:
+          type: string
+          description: Кличка питомца
+        species:
+          type: string
+          description: Вид животного
+        breed:
+          type: string
+          description: Порода питомца
+        birthDate:
+          type: string
+          format: date
+          description: Дата рождения питомца
+        photoUrl:
+          type: string
+          description: Ссылка на фото питомца во внешнем хранилище
