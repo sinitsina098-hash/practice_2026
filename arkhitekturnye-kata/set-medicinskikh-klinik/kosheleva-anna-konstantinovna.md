@@ -3,9 +3,6 @@ order: 5
 title: Кошелева Анна Константиновна
 aliases:
   - path: >-
-      arkhitekturnye-kata/set-medicinskikh-klinik/arkhitekturnoe-kata-edupath-platforma-onla/kosheleva-anna-konstantinovna
-    moved: "2026-09-26T04:43:32Z"
-  - path: >-
       arkhitekturnye-kata/set-medicinskikh-klinik/bally-za-vypolnenie-laboratornoy-rest-api-maximu/kosheleva-anna-konstantinovna
     moved: "2026-09-26T04:43:38Z"
 ---
