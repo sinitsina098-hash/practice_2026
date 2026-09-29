@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: EduPath Testing API
+  description: API для работы с итоговыми тестами
+  version: 1.0.0
+
+paths:
+  /courses/{courseId}/final-test:
+    get:
+      summary: Получить итоговый тест курса
+      description: Возвращает тест без правильных ответов
+      operationId: getFinalTest
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          description: Идентификатор курса
+          schema:
+            type: integer
+          example: 15
+      responses:
+        '200':
+          description: Тест найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  testId:
+                    type: integer
+                    example: 42
+                  title:
+                    type: string
+                    example: Итоговый тест по REST API
+                  timeLimitMinutes:
+                    type: integer
+                    example: 30
+                  questions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        questionId:
+                          type: integer
+                          example: 101
+                        text:
+                          type: string
+                          example: Какой HTTP-метод получает данные
+                        options:
+                          type: array
+                          items:
+                            type: string
+                          example:
+                            - GET
+                            - POST
+                            - DELETE
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Студент не записан на курс
+        '404':
+          description: Курс или итоговый тест не найден
+        '500':
+          description: Внутренняя ошибка сервера
