@@ -1,97 +1,130 @@
 openapi: "3.0.1"
 info:
   version: 1.0.0 | 26.09.2026
-  title: Функция создания профиля клиента
-  description: Сервис профилей приложения FitTrack. Позволяет создать профиль после регистрации и получить данные профиля
+  title: Сервис прогресса пользователя FitTrack
+  description: Микросервис для получения и удаления информации о тренировках пользователя за выбранный период.
 security:
   - BearerAuth: []
 servers:
   - url: https://api.fittrack.ru/api/v1
 paths:
-  /profiles:
+  /getProgress:
     post:
-      summary: Создать профиль спортсмена
-      description: Метод создает профиль спортсмена после регистрации и возвращает его уникальный идентификатор
+      tags:
+        - progress
+      summary: Тренировки пользователя
+      description: Метод получает информацию о тренировках пользователя за выбранный период.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Profile'
+              $ref: '#/components/schemas/GetProgressRequest'
       responses:
         201:
-          description: Created
+          description: Тренировки пользователя
           content:
             application/json:
               schema:
-                type: string
-                format: uuid
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingSummary'
+        204:
+          description: No Content
         400:
           description: Bad Request
         401:
           description: Unauthorized
         500:
           description: Internal Service Error
-  /profiles/{profileId}:
-    get:
-      summary: Получить профиль по идентификатору
-      description: Метод возвращает данные профиля спортсмена по его идентификатору
-      parameters:
-        - in: path
-          name: profileId
-          required: true
-          schema:
-            type: string
-            format: uuid
+    delete:
+      tags:
+        - progress
+      summary: Удалить тренировку
+      description: Метод удаляет информацию о тренировке пользователя за выбранный период.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteProgressRequest'
       responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Profile'
+        201:
+          description: No Content
+        204:
+          description: No Content
         400:
           description: Bad Request
         401:
           description: Unauthorized
-        404:
-          description: Not Found
         500:
           description: Internal Service Error
+
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
+
   schemas:
-    Profile:
+    GetProgressRequest:
       type: object
-      description: Профиль спортсмена
+      required:
+        - userId
+        - dateFrom
+        - dateTo
       properties:
-        profileId:
+        userId:
           type: string
-          description: Уникальный идентификатор профиля
-        firstName:
+          description: id пользователя
+          example: "e7883ea2-de24-45c0-ae0e-d65c92a7cff7"
+        dateFrom:
           type: string
-          description: Имя
-        lastName:
+          format: date
+          description: Дата от
+          example: "2026-08-01"
+        dateTo:
           type: string
-          description: Фамилия
-        birthDate:
+          format: date
+          description: Дата по
+          example: "2026-08-31"
+
+    DeleteProgressRequest:
+      type: object
+      required:
+        - userId
+        - idTraining
+        - dateFrom
+        - dateTo
+      properties:
+        userId:
           type: string
-          description: Дата рождения (ГГГГ-ММ-ДД)
-        gender:
+          description: id пользователя
+          example: "e7883ea2-de24-45c0-ae0e-d65c92a7cff7"
+        idTraining:
           type: string
-          description: Пол (male / female)
-        heightCm:
+          description: id тренировки
+          example: "e7883ea2de2445c0ae0ed65c92a70001"
+        dateFrom:
+          type: string
+          format: date
+          description: Дата от
+          example: "2026-08-01"
+        dateTo:
+          type: string
+          format: date
+          description: Дата по
+          example: "2026-08-31"
+
+    TrainingSummary:
+      type: object
+      description: Элемент массива тренировок
+      properties:
+        nameTraining:
+          type: string
+          description: Название тренировки
+          example: "Strength Training"
+        count:
           type: integer
-          description: Рост, см
-        weightKg:
-          type: number
-          description: Вес, кг
-        goal:
-          type: string
-          description: Цель тренировок (weight_loss, muscle_gain, endurance, health)
-        level:
-          type: string
-          description: Уровень подготовки (beginner, intermediate, advanced)
+          description: Количество
+          example: 25
