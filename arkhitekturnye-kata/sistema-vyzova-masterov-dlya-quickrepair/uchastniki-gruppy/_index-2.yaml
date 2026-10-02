@@ -1,64 +1,178 @@
 openapi: 3.0.1
 info:
-  title: MS Cartography Service
-  version: 1.0.0
-  description: API для управления парковочными зонами
+  version:  1.0.0 | 01.04.2024
+  title: UserInteraction
+  description: Регистрация, вход в систему, обновление данных и удаление аккаунта
+security:
+  - BearerAuth: []
+  - OAuth2: []
 servers:
   - url: /api/v1
+  - url: https://{Host}/{EnvironmentPrefix}{MicroserviceName}/api/v1
+    variables:
+        Host:
+          default: UserInteraction.ru
+          description: Host на котором развернут микросервис
+        EnvironmentPrefix:
+          default: ''
+          description: |
+            Префикс конкретного тестового стенда, выделенного под задачу (feature environment).
+            Фактически позволяет окончательно идентифицировать host микросервиса, т.к. хостинге мс в кластере они все хостятся на одном dns - условном host.ru
+        MicroserviceName:
+          default: UserInteraction
+          description: |
+            Имя под которым микросервис развернут в кластере микросервисов
+            Фактически позволяет окончательно идентифицировать host микросервиса при обращениях к нему
 tags:
-  - name: zones
-    description: Операции с зонами
+    - name: data
+      description: методы, использующие данные пользователя
 paths:
-  /parking-zones:
+  /data:
     post:
       tags:
-        - zones
-      summary: Создать парковочную зону
-      description: Метод добавляет новую зону на карту
+        - data
+      operationId: CreateUser
+      summary: Создать аккаунт пользователя
+      description: Метод создает аккаунт
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resource'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/parameters/resourceId'
+        204:
+          description: No Content
+        400:
+          description: Bad Request
+        500:
+          description: Internal Service Error
+  /data/{resourceId}:  
+    delete:
+      tags:
+        - data
+      operationId: deleteUser
+      summary: Удалить аккаунт
+      description: Метод удаляет аккаунт по его идентификатору
+      parameters:
+        - in: path
+          name: resourceId
+          required: true
+          schema:
+            $ref: "#/components/parameters/resourceId"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        404:
+          description: Not Found
+        500:
+          description: Internal Service Error  
+    put:
+      tags:
+        - data
+      operationId: UpdateResource
+      summary: Обновить объект
+      description: Метод обновляет данные аккаунта(пароль)
+      parameters:
+        - in: path
+          name: resourceId
+          required: true
+          schema:
+            $ref: "#/components/parameters/resourceId"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ZoneRequest'
+              $ref: '#/components/schemas/ResourcesUpdate'
+             
       responses:
-        '201':
-          description: Зона успешно создана
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ZoneResponse'
-        '400':
-          description: Ошибка в данных запроса
-        '500':
-          description: Внутренняя ошибка сервера
-
+        200:
+          description: OK
+        204:
+          description: No Content
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        404:
+          description: Not Found
+        500:
+          description: Internal Service Error
+  /existing_data:
+    post:
+      tags:
+        - data
+      operationId: UserEntering
+      summary: Вход пользователя в аккаунт
+      description: Метод запрашивает логин и пароль для входа в аккаунт
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resource'
+             
+      responses:
+        200:
+          description: OK
+        204:
+          description: No Content
+        400:
+          description: Bad Request
+        404:
+          description: Not Found
+        500:
+          description: Internal Service Error
 components:
+  securitySchemes:
+      BearerAuth:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+      OAuth2:
+         type: oauth2
+         flows:
+          password:
+            tokenUrl: https://auth.tusvc.bcs.ru/auth/realms/perseus/protocol/openid-connect/token
+            scopes: {}
+  parameters:  
+    resourceId:
+      name: resourceId
+      in: path
+      description: Уникальный идентификатор
+      required: true
+      schema:
+        type: string
+        format: uuid
   schemas:
-    ZoneRequest:
+    ResourcesUpdate:
+      description: Обновление пароля аккаунта
       type: object
       required:
-        - name
-        - points
+        - password
       properties:
-        name:
-          type: string
-          description: Название зоны
-          example: "Центральный район"
-        points:
-          type: array
-          description: Список координат границы зоны
-          items:
-            type: string
-          example: ["55.75, 37.61", "55.76, 37.62"]
-    
-    ZoneResponse:
+        password:
+         type: string
+         description: Пароль
+    Resource:
       type: object
+      description: Ввод данных для создания аккаунта/входа в аккаунт
+      required:
+        - login
+        - password
       properties:
-        id:
-          type: string
-          description: ID созданной зоны
-          example: "zone-123"
-        status:
-          type: string
-          example: "success"
+        login:
+         type: string
+         description: Логин
+        password:
+         type: string
+         description: Пароль
