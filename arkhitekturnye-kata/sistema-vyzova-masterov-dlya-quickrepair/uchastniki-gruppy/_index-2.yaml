@@ -1,69 +1,64 @@
-openapi: "3.0.1"
+openapi: 3.0.1
 info:
+  title: MS Cartography Service
   version: 1.0.0
-  title: Parking History Service API
+  description: API для управления парковочными зонами
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: /api/v1
 tags:
-  - name: parking-history
-
+  - name: zones
+    description: Операции с зонами
 paths:
-  /parking-sessions: 
-    get:
-      tags: [parking-history]
-      summary: Получить историю парковок водителя
-      parameters:
-        - in: query
-          name: driverId
-          required: true
-          schema: { type: string }
-        - in: query
-          name: dateFrom
-          schema: { type: string, format: date }
-        - in: query
-          name: dateTo
-          schema: { type: string, format: date }
-        - in: query
-          name: paymentStatus
-          schema: { type: string, enum: [Оплачено, Не оплачено, В процессе] }
+  /parking-zones:
+    post:
+      tags:
+        - zones
+      summary: Создать парковочную зону
+      description: Метод добавляет новую зону на карту
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZoneRequest'
       responses:
-        '200':
-          description: Успешный ответ
+        '201':
+          description: Зона успешно создана
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    sessionId: { type: string }
-                    location: { type: string }
-                    startTime: { type: string, format: date-time }
-                    endTime: { type: string, format: date-time }
-                    cost: { type: number }
-                    paymentStatus: { type: string }
+                $ref: '#/components/schemas/ZoneResponse'
+        '400':
+          description: Ошибка в данных запроса
+        '500':
+          description: Внутренняя ошибка сервера
 
-  /parking-sessions/{sessionId}: 
-    get:
-      tags: [parking-history]
-      summary: Получить детальную информацию по сессии
-      parameters:
-        - in: path
-          name: sessionId
-          required: true 
-          schema: { type: string }
-      responses:
-        '200':
-          description: Успешный ответ
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  sessionId: { type: string }
-                  location: { type: string }
-                  startTime: { type: string, format: date-time }
-                  endTime: { type: string, format: date-time }
-                  duration: { type: string }
-                  cost: { type: number }
-                  paymentStatus: { type: string }
+components:
+  schemas:
+    ZoneRequest:
+      type: object
+      required:
+        - name
+        - points
+      properties:
+        name:
+          type: string
+          description: Название зоны
+          example: "Центральный район"
+        points:
+          type: array
+          description: Список координат границы зоны
+          items:
+            type: string
+          example: ["55.75, 37.61", "55.76, 37.62"]
+    
+    ZoneResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID созданной зоны
+          example: "zone-123"
+        status:
+          type: string
+          example: "success"
